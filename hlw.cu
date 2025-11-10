@@ -1,5 +1,4 @@
 #include <iostream>
-#include "devicemath.cuh"
 
 void divide(const float* a, const float* b, float* c, int N) {
     for (int i = 0; i < N; i++) {
@@ -7,6 +6,11 @@ void divide(const float* a, const float* b, float* c, int N) {
     }
 }
 
+__global__ void Divide(float const* a, float const* b, float* c, int N) {
+    const int i = blockIdx.x * blockDim.x + threadIdx.x;
+    if (i < N)
+        c[i] = a[i] / b[i];
+}
 
 int main() {
     // function to add the elements of two arrays
