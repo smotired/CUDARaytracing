@@ -3,6 +3,7 @@
 #include <cuda_runtime.h>
 
 // Default vectors
+__managed__ const float3 F3_ZERO = make_float3(1.0f, 0.0f, 0.0f);
 __managed__ const float3 F3_RIGHT = make_float3(1.0f, 0.0f, 0.0f);
 __managed__ const float3 F3_UP = make_float3(0.0f, 1.0f, 0.0f);
 __managed__ const float3 F3_FORWARD = make_float3(0.0f, 0.0f, 1.0f);
@@ -99,6 +100,16 @@ __host__ __device__ inline void operator-=(float3& a, const float3 b) {
     a.x -= b.x;
     a.y -= b.y;
     a.z -= b.z;
+}
+
+/// <summary>
+/// Multiply two vectors component-wise
+/// </summary>
+/// <param name="a">The first vector.</param>
+/// <param name="b">The second vector.</param>
+/// <returns>The product vector of the components of the two vectors.</returns>
+__host__ __device__ inline float3 operator*(const float3 a, const float3 b) {
+    return make_float3(a.x * b.x, a.y * b.y, a.z * b.z);
 }
 
 /// <summary>

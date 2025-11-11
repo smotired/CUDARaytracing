@@ -5,6 +5,9 @@ set(CMAKE_CUDA_STANDARD 20)
 
 add_executable(cuda_raytracing main.cu
         math/float3.cuh
+        scene/structs.cu
+        scene/structs.cuh
+        math/matrix.cuh
 )
 
 set_target_properties(cuda_raytracing PROPERTIES
