@@ -15,9 +15,8 @@ __global__ void RenderPixels() {
     // Use x for r and y for g, and then y for z buffer as well
     const float dX = pX / (float)theScene.render.width;
     const float dY = pY / (float)theScene.render.height;
-    theScene.render.results[pI] = Color(dX, dY, 0);
+    theScene.render.results[pI] = color(dX, dY, 0);
     theScene.render.zBuffer[pI] = pY;
-    theScene.render.results[pI] = Color(0, 0, 1);
 }
 
 void Renderer::BeginRendering() {

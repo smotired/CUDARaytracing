@@ -124,9 +124,9 @@ struct Hit {
 
     // Initialize with default values
     void Init() {
-        pos = Float3(F3_ZERO);
+        pos = F3_ZERO;
         z = BIGFLOAT;
-        n = Float3(F3_UP);
+        n = F3_UP;
         front = true;
         node = nullptr;
     }
@@ -214,7 +214,7 @@ struct Box {
     float3 pmax;
 
     // Initializes the box, such that there exists no point inside the box (i.e. it is empty).
-    void Init() { pmin = Float3(BIGFLOAT,BIGFLOAT,BIGFLOAT); pmax = Float3(-BIGFLOAT,-BIGFLOAT,-BIGFLOAT); }
+    void Init() { pmin = float3(BIGFLOAT,BIGFLOAT,BIGFLOAT); pmax = float3(-BIGFLOAT,-BIGFLOAT,-BIGFLOAT); }
 
     // Returns true if the box is empty; otherwise, returns false.
     [[nodiscard]] bool IsEmpty() const { return pmin.x>pmax.x || pmin.y>pmax.y || pmin.z>pmax.z; }
@@ -231,7 +231,7 @@ struct Box {
 
     // Use the slab method to determine if the ray intersects with the box
     __host__ __device__ bool IntersectRay(const Ray& ray, float& dist, const float t_max = BIGFLOAT) const {
-	    const float3 inv = Float3(1.0f / ray.dir.x, 1.0f / ray.dir.y, 1.0f / ray.dir.z);
+	    const float3 inv = float3(1.0f / ray.dir.x, 1.0f / ray.dir.y, 1.0f / ray.dir.z);
 
         const float3 tLow = (pmin - ray.pos) * inv;
         const float3 tHigh = (pmax - ray.pos) * inv;

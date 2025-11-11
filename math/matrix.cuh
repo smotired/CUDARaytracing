@@ -71,7 +71,7 @@ public:
     /// <param name="v">The vector to transform.</param>
     /// <returns>The transformed vector.</returns>
     __host__ __device__ inline float3 operator*(const float3 v) const {
-        return Float3(cells[0] * v.x + cells[3] * v.y + cells[6] * v.z + cells[9],
+        return float3(cells[0] * v.x + cells[3] * v.y + cells[6] * v.z + cells[9],
                       cells[1] * v.x + cells[4] * v.y + cells[7] * v.z + cells[10],
                       cells[2] * v.x + cells[5] * v.y + cells[8] * v.z + cells[11]);
     }
@@ -82,7 +82,7 @@ public:
     /// <param name="v">The vector to transform.</param>
     /// <returns>The transformed vector.</returns>
     __host__ __device__ inline float3 operator%(const float3 v) const {
-        return Float3(cells[0] * v.x + cells[3] * v.y + cells[6] * v.z,
+        return float3(cells[0] * v.x + cells[3] * v.y + cells[6] * v.z,
                       cells[1] * v.x + cells[4] * v.y + cells[7] * v.z,
                       cells[2] * v.x + cells[5] * v.y + cells[8] * v.z);
     }

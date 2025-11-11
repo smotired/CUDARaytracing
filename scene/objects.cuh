@@ -7,6 +7,6 @@
 class Sphere : public Object {
 public:
     bool IntersectRay(Ray &ray, int hitSide) const override;
-    Box GetBoundBox() const override { return Box(Float3(-1, -1, -1), Float3(1, 1, 1)); };
+    Box GetBoundBox() const override { return Box(-F3_ONE, F3_ONE); };
     void ViewportDisplay( /*Material const* material*/ ) const override;
 };

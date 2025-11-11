@@ -25,7 +25,7 @@ Sphere theSphere;
 //-------------------------------------------------------------------------------
 
 size_t CountNodes( Loader const& loader );
-void AssignNodes( Loader const& loader, Node* nodeList, int& next );
+void AssignNodes( Loader const& loader, Node* nodeList, int& next, const Matrix& parentTransform );
 
 //-------------------------------------------------------------------------------
 
@@ -82,12 +82,13 @@ void Scene::Load( Loader const &sceneLoader )
 	// Allocate memory for the node list
 	nodes = new Node[nodeCount];
 	cudaMallocManaged(&nodes, sizeof(Node) * nodeCount);
+	Matrix ident;
 
 	// Assign nodes in depth-first order
 	int next = 1; // index of next element
 	for ( Loader loader : sceneLoader ) {
 		if ( loader == "object" ) {
-			AssignNodes(loader, nodes, next);
+			AssignNodes(loader, nodes, next, ident);
 		}
 	}
 }
@@ -102,7 +103,7 @@ size_t CountNodes( Loader const &loader ) {
 	return total;
 }
 
-void AssignNodes( Loader const &loader, Node* nodeList, int& next ) {
+void AssignNodes( Loader const &loader, Node* nodeList, int& next, const Matrix& parentTransform ) {
 	// Get a reference to the node and then increment the pointer
 	Node *node = nodeList + (next++);
 
@@ -115,11 +116,12 @@ void AssignNodes( Loader const &loader, Node* nodeList, int& next ) {
 
 	if ( node->object ) node->object->Load(loader);	// loads object-specific parameters (if any)
 
-	// Apply transformations as we recurse to children
+	// Apply transformations
+	node->tm *= parentTransform;
 	for ( Loader L : loader ) {
 		if ( L == "scale" ) {
 			float3 s;
-			L.ReadFloat3(s, Float3(1,1,1));
+			L.ReadFloat3(s, F3_ONE);
 			node->tm *= Matrix::Scale(s);
 		} else if ( L == "rotate" ) {
 			float3 s;
@@ -132,13 +134,17 @@ void AssignNodes( Loader const &loader, Node* nodeList, int& next ) {
 			L.ReadFloat3(t);
 			node->tm *= Matrix::Translation(t);
 		}
-		else if ( L == "object" ) {
-			AssignNodes(L, nodeList, next);
-		}
 	}
 
 	// Setup inverse matrix again
 	node->itm = node->tm.GetInverse();
+
+	// Recurse to children
+	for ( Loader L : loader ) {
+		if ( L == "object" ) {
+			AssignNodes(L, nodeList, next, node->tm);
+		}
+	}
 }
 
 //-------------------------------------------------------------------------------

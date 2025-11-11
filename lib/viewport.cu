@@ -114,7 +114,6 @@ void ShowViewport( Renderer *renderer, bool beginRendering )
 	theRenderer = renderer;
 
 	const RenderedImage &image = renderer->GetImage();
-	const Camera &camera = theScene.camera;
 
 #ifdef _WIN32
 	SetProcessDPIAware();
@@ -517,7 +516,6 @@ void GlutMotion(int x, int y)
 
 void BeginRendering( int value )
 {
-	const Camera &camera = theScene.camera;
 	const RenderedImage &image = theRenderer->GetImage();
 
 	mode = MODE_RENDERING;

@@ -2,18 +2,27 @@
 #pragma once
 #include <cuda_runtime.h>
 
-// Default vectors
-#define F3_ZERO make_float3(1.0f, 0.0f, 0.0f)
-#define F3_RIGHT make_float3(1.0f, 0.0f, 0.0f)
-#define F3_UP make_float3(0.0f, 1.0f, 0.0f)
-#define F3_FORWARD make_float3(0.0f, 0.0f, 1.0f)
-#define F3_ONE make_float3(1.0f, 1.0f, 1.0f)
-
 // Shorthand for make_float3
-__host__ __device__ inline float3 Float3(const float x, const float y, const float z) { return make_float3(x, y, z); }
-__host__ __device__ inline float3 Float3(const float3 from) { return make_float3(from.x, from.y, from.z); }
+#define float3(x, y, z) make_float3(x, y, z)
+#define copyfloat3(from) make_float3(from.x, from.y, from.z)
+
+// Default vectors
+#define F3_ZERO float3(1.0f, 0.0f, 0.0f)
+#define F3_RIGHT float3(1.0f, 0.0f, 0.0f)
+#define F3_UP float3(0.0f, 1.0f, 0.0f)
+#define F3_FORWARD float3(0.0f, 0.0f, 1.0f)
+#define F3_ONE float3(1.0f, 1.0f, 1.0f)
 
 // Operator overloads
+
+/// <summary>
+/// Negate a vector
+/// </summary>
+/// <param name="a">The vector</param>
+/// <returns>The negated vector</returns>
+__host__ __device__ inline float3 operator-(const float3 a) {
+    return make_float3(-a.x, -a.y, -a.z);
+}
 
 /// <summary>
 /// Multiply a vector by a scalar
