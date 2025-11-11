@@ -1,15 +1,12 @@
 /// Structs that are part of the scene
 #pragma once
+#include "structs.cuh"
 #include "../math/float3.cuh"
+#include "../math/color.cuh"
 #include "../math/matrix.cuh"
+#include "../lib/xmlload.cuh"
 
 #define BIGFLOAT std::numeric_limits<float>::max()
-
-// Rendering macros
-#define BIAS 0.0001f;
-#define BOUNCES 8;
-// #define SAMPLE_MIN 4;
-// #define SAMPLE_MAX 64;
 
 // Overview objects
 struct RenderInfo;
@@ -49,6 +46,9 @@ struct RenderInfo {
 
     // Primary ray counts per pixel
     // unsigned int* sampleCounts;
+
+    // Load the RenderInfo
+    void Load( Loader const &loader );
 };
 
 /// <summary>
@@ -69,6 +69,9 @@ struct Camera {
 
     // Depth of field in world space units
     // float dof;
+
+    // Load the camera
+    void Load( Loader const &loader );
 };
 
 /// <summary>
@@ -82,17 +85,26 @@ struct Scene {
     Camera camera;
 
     // The nodes in the tree, in depth-first order
-    const Node* nodes;
+    Node* nodes;
 
     // The amount of nodes in the scene.
-    const size_t nodeCount;
+    size_t nodeCount;
 
-    // The first light in the list of lights in the scene
-    const Light* lights;
+    // The list of lights in the scene
+    Light* lights;
 
     // How many lights are present in the scene
-    const size_t lightCount;
+    size_t lightCount;
+
+    // Load the scene
+    void Load( Loader const &loader );
 };
+
+// Hit sides
+#define HIT_NONE 0
+#define HIT_FRONT 1
+#define HIT_BACK 2
+#define HIT_FRONT_AND_BACK HIT_FRONT | HIT_BACK
 
 struct Hit {
     // Position of the hit in world space
@@ -120,7 +132,7 @@ struct Hit {
     }
 
     // Transform a hit with a matrix
-    void Transform(const Matrix& tm) {
+    __host__ __device__ void Transform(const Matrix& tm) {
         pos = tm * pos;
         n = norm(tm % n);
     }
@@ -136,19 +148,59 @@ struct Ray {
     // Hit position of the ray
     Hit hit;
 
+    // Pixel index (y * width + x) of the ray
+    unsigned int pixel;
+
+    // Contribution of the ray to the final color
+    color contribution;
+
     // Initialize a ray
-    void Init(const float3 p, const float3 d) {
+    void Init(const float3 p, const float3 d, const unsigned int pI, const color cont = WHITE) {
         pos = p;
         dir = d;
+        pixel = pI;
+        contribution = cont;
         hit.Init();
     }
 
     // Transform a ray with a matrix
-    void Transform(const Matrix& tm) {
+    __host__ __device__ void Transform(const Matrix& tm) {
         pos = tm * pos;
         dir = tm % dir;
         hit.Transform(tm);
     }
+};
+
+/// <summary>
+/// Represents the actual body that goes with a node
+/// </summary>
+class Object {
+public:
+    virtual bool IntersectRay(Ray& ray, int hitSide) const = 0;
+    virtual Box GetBoundBox() const = 0;
+    virtual void ViewportDisplay( /*Material const* material*/ ) const {} // used for OpenGL preview
+    virtual void Load( Loader const &loader ) {} // Used for things with special load requirements like meshes
+};
+
+/// <summary>
+/// Represents a temporary light in the scene
+/// </summary>
+class Light {
+    virtual color Illuminate(Ray const& ray, float3 &dir) const = 0; // Returns intensity and direction
+    virtual bool IsAmbient() const { return false; }
+    virtual void SetViewportLight( int lightID ) const {} // used for OpenGL preview
+    virtual void Load( Loader const &loader ) {}
+};
+
+class Material {
+public:
+    color diffuse = BLACK;  // How much light is scattered
+    color specular = WHITE; // How much light is reflected
+    float glossiness = 512;              // Smoothness of the surface
+
+    [[nodiscard]] color Shade(Ray const& ray) const { return ray.hit.n; };
+    void SetViewportMaterial( int mtlID=0 ) const {} // used for OpenGL display
+    void Load( Loader const &loader ) { /* Will do something later */ }
 };
 
 /// <summary>
@@ -178,21 +230,21 @@ struct Box {
     }
 
     // Use the slab method to determine if the ray intersects with the box
-    __host__ __device__ bool IntersectRay(const Ray& ray, float& dist, float t_max = BIGFLOAT) {
-	    float3 inv = Float3(1.0f / ray.dir.x, 1.0f / ray.dir.y, 1.0f / ray.dir.z);
+    __host__ __device__ bool IntersectRay(const Ray& ray, float& dist, const float t_max = BIGFLOAT) const {
+	    const float3 inv = Float3(1.0f / ray.dir.x, 1.0f / ray.dir.y, 1.0f / ray.dir.z);
 
-        float3 tLow = (pmin - ray.pos) * inv;
-        float3 tHigh = (pmax - ray.pos) * inv;
+        const float3 tLow = (pmin - ray.pos) * inv;
+        const float3 tHigh = (pmax - ray.pos) * inv;
 
-        float3 tClose(std::fmin(tLow.x, tHigh.x),
+        const float3 tClose(std::fmin(tLow.x, tHigh.x),
                       std::fmin(tLow.y, tHigh.y),
                       std::fmin(tLow.z, tHigh.z));
-        float3 tFar(std::fmax(tLow.x, tHigh.x),
+        const float3 tFar(std::fmax(tLow.x, tHigh.x),
                     std::fmax(tLow.y, tHigh.y),
                     std::fmax(tLow.z, tHigh.z));
 
-        float tEnter = std::fmax(tClose.x, std::fmax(tClose.y, tClose.z));
-        float tExit = std::fmin(tFar.x, std::fmin(tFar.y, tFar.z));
+        const float tEnter = std::fmax(tClose.x, std::fmax(tClose.y, tClose.z));
+        const float tExit = std::fmin(tFar.x, std::fmin(tFar.y, tFar.z));
 
         // If it actually enters, the box, return the intersection distance
         if ((tEnter >= 0 || tExit >= 0) && tEnter <= tExit && tEnter <= t_max) {
@@ -209,22 +261,43 @@ struct Box {
 /// </summary>
 struct Node {
     // The amount of children on this node. The node list is in depth-first order.
-    const size_t childCount;
+    size_t childCount;
 
     // The object associated with this node
-    const Object* object;
+    Object* object;
 
     // The material associated with this node
-    const Material* material;
+    Material* material;
 
     // The bounding box of this object.
-    const Box boundingBox;
+    Box boundingBox{};
 
     // Transformation matrix from world space to local space
-    const Matrix tm;
+    Matrix tm;
 
     // Transformation matrix from local space to world space
-    const Matrix itm;
+    Matrix itm;
+
+    // Default constructor
+    Node() {
+        object = nullptr;
+        material = nullptr;
+        tm = Matrix();
+        itm = Matrix();
+        boundingBox = Box();
+        childCount = 0;
+    }
+
+    // Construct a node
+    Node(Object* obj, Material* mat, const Matrix &transformation) {
+        object = obj;
+        material = mat;
+        tm = transformation;
+        itm = transformation.GetInverse();
+        Box objectBoundingBox = object->GetBoundBox();
+        boundingBox = Box(tm * objectBoundingBox.pmin, tm * objectBoundingBox.pmax);
+        childCount = 0;
+    }
 
     // Transform a ray from world space to local space
     void ToLocal(Ray& ray) const {
@@ -235,4 +308,7 @@ struct Node {
     void FromLocal(Ray& ray) const {
         ray.Transform(itm);
     }
+
+    // Load the node into the scene
+    void Load( Loader const &loader );
 };

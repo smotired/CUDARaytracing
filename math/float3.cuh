@@ -3,28 +3,15 @@
 #include <cuda_runtime.h>
 
 // Default vectors
-__managed__ const float3 F3_ZERO = make_float3(1.0f, 0.0f, 0.0f);
-__managed__ const float3 F3_RIGHT = make_float3(1.0f, 0.0f, 0.0f);
-__managed__ const float3 F3_UP = make_float3(0.0f, 1.0f, 0.0f);
-__managed__ const float3 F3_FORWARD = make_float3(0.0f, 0.0f, 1.0f);
-
-// Typedef of a Color as a float3
-
-/// <summary>
-/// A float3 that represents a color
-/// </summary>
-typedef float3 color;
-
-// Default colors
-
-__managed__ const color BLACK = make_float3(0.0f, 0.0f, 0.0f);
-__managed__ const color WHITE = make_float3(1.0f, 1.0f, 1.0f);
+#define F3_ZERO make_float3(1.0f, 0.0f, 0.0f)
+#define F3_RIGHT make_float3(1.0f, 0.0f, 0.0f)
+#define F3_UP make_float3(0.0f, 1.0f, 0.0f)
+#define F3_FORWARD make_float3(0.0f, 0.0f, 1.0f)
+#define F3_ONE make_float3(1.0f, 1.0f, 1.0f)
 
 // Shorthand for make_float3
 __host__ __device__ inline float3 Float3(const float x, const float y, const float z) { return make_float3(x, y, z); }
 __host__ __device__ inline float3 Float3(const float3 from) { return make_float3(from.x, from.y, from.z); }
-__host__ __device__ inline float3 Color(const float x, const float y, const float z) { return make_float3(x, y, z); }
-__host__ __device__ inline float3 Color(const color from) { return make_float3(from.x, from.y, from.z); }
 
 // Operator overloads
 
@@ -129,7 +116,7 @@ __host__ __device__ inline float operator%(const float3 a, const float3 b) {
 /// <param name="b">The second vector.</param>
 /// <returns>The cross product of the two vectors.</returns>
 __host__ __device__ inline float3 cross(const float3 a, const float3 b) {
-    return RIGHT * (a.y * b.z - b.y * a.z) + UP * (a.x * b.z - b.x * a.z) + FORWARD * (a.x * b.y - b.x * a.y);
+    return F3_RIGHT * (a.y * b.z - b.y * a.z) + F3_UP * (a.x * b.z - b.x * a.z) + F3_FORWARD * (a.x * b.y - b.x * a.y);
 }
 
 /// <summary>
@@ -161,14 +148,14 @@ __host__ __device__ inline float3 norm(const float3 a) {
 }
 
 /// <summary>Set values on a float3.</summary>
-__host__ __device__ inline float3 set(float3& a, const float x, const float y, const float z) {
+__host__ __device__ inline void set(float3& a, const float x, const float y, const float z) {
     a.x = x; a.y = y; a.z = z;
 }
 
 /// <summary>
 /// Get two unit vectors orthogonal to another normal vector, forming an orthonormal basis.
 /// </summary>
-__host__ __device__ inline float3 orthonormals(const float3 n, float3& x, float3& y) {
+__host__ __device__ inline void orthonormals(const float3 n, float3& x, float3& y) {
     // Copied from Cem's code
     if (n.z >= n.y) {
         const float a =  1.0f / (1.0f + n.z);
