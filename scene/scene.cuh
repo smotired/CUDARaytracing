@@ -103,6 +103,12 @@ struct Scene {
     // How many lights are present in the scene
     size_t lightCount;
 
+    // The list of materials in the scene
+    Material* materials;
+
+    // How many materials are in the scene
+    size_t materialCount;
+
     // Load the scene
     void Load( Loader const &loader );
 };
@@ -113,7 +119,7 @@ public:
     color specular = WHITE; // How much light is reflected
     float glossiness = 512;              // Smoothness of the surface
 
-    [[nodiscard]] color Shade(Ray const& ray) const { return ray.hit.n; };
+    [[nodiscard]] __device__ color Shade(Ray const& ray) const;
     void SetViewportMaterial( int mtlID=0 ) const {} // used for OpenGL display
     void Load( Loader const &loader ) { /* Will do something later */ }
 };

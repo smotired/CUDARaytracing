@@ -16,16 +16,18 @@ __global__ void DispatchPrimaryRays() {
 
     // Create and cast a ray
     Ray ray(theScene.camera.position, pixelCoords - theScene.camera.position, pI);
-    const color sample = TraceRay(ray);
+    const bool hit = TraceRay(ray);
 
-    // TODO: When we have a ray queue they should handle this with their contributions
+    color sample = color(0, 0, 0.1f); // Dark blue if we hit nothing
+    if (hit) sample = ray.hit.node->material->Shade(ray);
+
     theScene.render.results[pI] = sample;
     theScene.render.zBuffer[pI] = ray.hit.z;
 }
 
-__device__ color TraceRay(Ray &ray, int hitSide) {
+__device__ bool TraceRay(Ray &ray, int hitSide) {
     // Loop through the object list
-    color col = color(0, 0, 0.1); // Initialize dark blue so we can tell it works
+    bool hitAnything = false;
     for (int i = 0; i < theScene.nodeCount; i++) {
         Node* node = theScene.nodes + i;
         if (HAS_OBJ(node->object)) {
@@ -35,12 +37,12 @@ __device__ color TraceRay(Ray &ray, int hitSide) {
                 [&ray, hitSide](const auto &object) { return object->IntersectRay(ray, hitSide); }, node->object);
 
             if (hit) {
-                // Apply the node, and return white
+                // Apply the node
                 ray.hit.node = node;
-                col = WHITE;
+                hitAnything = true;
             }
             ray.Transform(node->tm);
         }
     }
-    return col;
+    return hitAnything;
 }

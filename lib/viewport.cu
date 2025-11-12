@@ -546,5 +546,17 @@ void Sphere::ViewportDisplay() const
 	}
 	gluSphere(q,1,50,50);
 }
+
+void GLLight::SetViewportParam( int lightID, color const &ambient, color const &intensity, float4 const &pos ) const
+{
+	float4 namb = make_float4(ambient.x, ambient.y, ambient.z, 1.0f);
+	float4 nint = make_float4(intensity.x, intensity.y, intensity.z, 1.0f);
+
+	glEnable ( GL_LIGHT0 + lightID );
+	glLightfv( GL_LIGHT0 + lightID, GL_AMBIENT,  &namb.x );
+	glLightfv( GL_LIGHT0 + lightID, GL_DIFFUSE,  &nint.x );
+	glLightfv( GL_LIGHT0 + lightID, GL_SPECULAR, &nint.x );
+	glLightfv( GL_LIGHT0 + lightID, GL_POSITION, &pos.x );
+}
 //-------------------------------------------------------------------------------
 //-------------------------------------------------------------------------------
