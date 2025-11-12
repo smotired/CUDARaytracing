@@ -16,15 +16,21 @@
 
 // Program macros
 #define RAY_THREADS_PER_BLOCK_X 16
-
 inline cudaError_t err = cudaSuccess; // Global variable to ensure these macros always work.
-
 // Check a specific call for an error
-#define CERR(fn) err = fn; \
+#define CERR(fn) \
+    err = fn; \
     if (err != cudaSuccess) printf("CUDA error: %s\n", cudaGetErrorString(err))
-
 // Check the last error
 #define CLERR() CERR(cudaGetLastError())
+// Target pixels for debugging
+#define DEBUG_X -1
+#define DEBUG_Y -1
+#define DEBUG ((DEBUG_X | DEBUG_Y) >= 0)
+#define DEBUG_PRINT(...) if (DEBUG) printf(__VA_ARGS__)
+#define DEBUG_KERNEL(blocks, threads, kernel, ...) \
+    if (!DEBUG) kernel<<<blocks, threads>>>(__VA_ARGS__); \
+    else kernel<<<1, 1>>>(__VA_ARGS__)
 
 //-------------------------------------------------------------------
 
