@@ -13,6 +13,7 @@ __device__ color Material::Shade(Ray const& ray) const {
         // Get intensity and direction
         color intensity = LIGHT_ILLUMINATE(light, hit, l);
         DEBUG_PRINT("Light %d intensity: %.2f,%.2f,%.2f, direction: %.2f,%.2f,%.2f\n", i, intensity.x, intensity.y, intensity.z, l.x, l.y, l.z);
+        if (intensity == BLACK) continue;
 
         // Ambient lights
         if (LIGHT_ISAMBIENT(light)) {
@@ -35,14 +36,12 @@ __device__ color Material::Shade(Ray const& ray) const {
             const float cos_phi = h % hit.n;
             DEBUG_PRINT("cos_theta: %.2f, cos_phi:%.2f\n", cos_theta, cos_phi);
 
-            // Add colors if the surface is lit
-            if (cos_theta >= 0) {
-                color diff = intensity * diffuse * cos_theta;
-                color spec = intensity * specular * powf(cos_phi, glossiness);
-                DEBUG_PRINT("Light %d Contribution: %.2f,%.2f,%.2f (diffuse), %.2f,%.2f,%.2f (specular)\n", i, diff.x, diff.y, diff.z, spec.x, spec.y, spec.z);
+            // Add colors
+            color diff = cos_theta >= 0 ? (intensity * diffuse * cos_theta) : BLACK; // clamp to 0
+            color spec = intensity * specular * powf(cos_phi, glossiness);
+            DEBUG_PRINT("Light %d Contribution: %.2f,%.2f,%.2f (diffuse), %.2f,%.2f,%.2f (specular)\n", i, diff.x, diff.y, diff.z, spec.x, spec.y, spec.z);
 
-                total += diff + spec;
-            }
+            total += diff + spec;
             DEBUG_PRINT("Current total: %.2f,%.2f,%.2f\n", total.x, total.y, total.x);
         }
     }

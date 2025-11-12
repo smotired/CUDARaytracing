@@ -1,0 +1,76 @@
+<xml>
+    <!--
+        Custom Scene file
+        Sam Hill - 2025.09.01
+        Version 1.0
+        Created for CS 5620, project 3
+    -->
+
+    <scene>
+        <!-- Objects -->
+        <object type="sphere" name="surface" material="flat">
+            <scale x="12" y="0.1" z="12"/>
+            <translate y="-2.1"/>
+        </object>
+        <object type="sphere" name="center" material="spec">
+            <scale x="2" y="2" z="2"/>
+        </object>
+
+        <object type="sphere" name="ball1" material="spec">
+            <translate x="-5.2" y="-1" z="3" />
+        </object>
+        <object type="sphere" name="ball2" material="spec">
+            <translate x="5.2" y="-1" z="3" />
+        </object>
+        <object type="sphere" name="ball3" material="spec">
+            <translate x="0" y="-1" z="-6" />
+        </object>
+
+        <object type="sphere" name="ball4" material="spec">
+            <translate x="-5.2" y="-1" z="-3" />
+        </object>
+        <object type="sphere" name="ball5" material="spec">
+            <translate x="5.2" y="-1" z="-3" />
+        </object>
+        <object type="sphere" name="ball6" material="spec">
+            <translate x="0" y="-1" z="6" />
+        </object>
+
+        <!-- Materials -->
+        <material type="blinn" name="flat">
+            <diffuse  r="1" g="1" b="1"/>
+            <specular value="0"/>
+        </material>
+        <material type="blinn" name="spec">
+            <diffuse  r="0.2" g="0" b="0.1"/>
+            <specular value="1"/>
+        </material>
+
+        <!-- Lights -->
+        <light type="ambient" name="ambientLight">
+            <intensity value="0.1"/>
+        </light>
+
+        <light type="point" name="redLight">
+            <intensity value="1" r="1" g="0" b="0"/>
+            <position x="-2.16" y="3" z="1.25"/>
+        </light>
+        <light type="point" name="greenLight">
+            <intensity value="1" r="0" g="1" b="0"/>
+            <position x="2.16" y="3" z="1.25"/>
+        </light>
+        <light type="point" name="blueLight">
+            <intensity value="1" r="0" g="0" b="1"/>
+            <position x="0" y="3" z="-2.5"/>
+        </light>
+    </scene>
+
+    <camera>
+        <position x="10" y="10" z="-17.3205080757" />
+        <target x="0" y="-4" z="0"/>
+        <up x="0" y="1" z="0"/>
+        <fov value="50"/>
+        <width value="1280"/>
+        <height value="720"/>
+    </camera>
+</xml>

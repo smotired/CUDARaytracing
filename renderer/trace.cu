@@ -19,7 +19,6 @@ __global__ void DispatchPrimaryRays() {
     DEBUG_PRINT("pI: %d, pCoords: %.2f,%.2f,%.2f\n", pI, pixelCoords.x, pixelCoords.y, pixelCoords.z);
     DEBUG_PRINT("START CAST\n");
     Ray ray(theScene.camera.position, pixelCoords - theScene.camera.position, pI);
-    ray.pos += ray.dir * BIAS;
     DEBUG_PRINT("RayO: %.2f,%.2f,%.2f, RayD: %.2f,%.2f,%.2f\n", ray.pos.x, ray.pos.y, ray.pos.z, ray.dir.x, ray.dir.y, ray.dir.z);
     const bool hit = TraceRay(ray, HIT_FRONT);
     DEBUG_PRINT("DID HIT: %d\n", hit);
@@ -45,6 +44,9 @@ __global__ void DispatchPrimaryRays() {
 }
 
 __device__ bool TraceRay(Ray &ray, int hitSide) {
+    // Add some bias
+    ray.pos += ray.dir * BIAS;
+
     // Loop through the object list
     bool hitAnything = false;
     for (int i = 0; i < theScene.nodeCount; i++) {
@@ -64,4 +66,27 @@ __device__ bool TraceRay(Ray &ray, int hitSide) {
         }
     }
     return hitAnything;
+}
+
+__device__ bool TraceShadowRay(ShadowRay& ray, const float3 n, const float tMax, const int hitSide) {
+    // Add some bias
+    ray.pos += ray.dir * BIAS + n * BIAS;
+
+    // Loop through the object list
+    bool hitAnything = false;
+    for (int i = 0; i < theScene.nodeCount; i++) {
+        Node* node = theScene.nodes + i;
+        if (HAS_OBJ(node->object)) {
+            // Trace a ray
+            node->ToLocal(ray);
+
+            const bool hit = cuda::std::visit(
+                [&ray, tMax, hitSide](const auto &object) { return object->IntersectShadowRay(ray, tMax, hitSide); }, node->object);
+            if (hit) return true;
+
+            node->FromLocal(ray);
+        }
+    }
+
+    return false;
 }

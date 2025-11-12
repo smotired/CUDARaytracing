@@ -9,10 +9,10 @@
 #include "../scene/objects.cuh"
 
 // Rendering macros
-#define BIAS 0.0001f;
-#define BOUNCES 8;
-// #define SAMPLE_MIN 4;
-// #define SAMPLE_MAX 64;
+#define BIAS 0.0002f
+#define BOUNCES 8
+// #define SAMPLE_MIN 4
+// #define SAMPLE_MAX 64
 
 // Program macros
 #define RAY_THREADS_PER_BLOCK_X 16
@@ -26,8 +26,8 @@ inline cudaError_t err = cudaSuccess; // Global variable to ensure these macros 
 // Target pixels for debugging
  #define DEBUG_X (-1)
  #define DEBUG_Y (-1)
-// #define DEBUG_X 750
-// #define DEBUG_Y 360
+// #define DEBUG_X 651
+// #define DEBUG_Y 150
 #define DEBUG ((DEBUG_X | DEBUG_Y) >= 0)
 #define DEBUG_PRINT(...) if (DEBUG) printf(__VA_ARGS__)
 #define DEBUG_KERNEL(blocks, threads, kernel, ...) \

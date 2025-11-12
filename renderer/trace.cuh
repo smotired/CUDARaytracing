@@ -9,4 +9,4 @@ __global__ void DispatchPrimaryRays();
 __device__ bool TraceRay(Ray& ray, int hitSide = HIT_FRONT_AND_BACK);
 
 // Trace a ray through the scene and calculate a shadow hit. Return true if it hits an object.
-__device__ bool TraceShadowRay(Ray& ray, float t_max, int hitSide = HIT_FRONT_AND_BACK);
+__device__ bool TraceShadowRay(ShadowRay& ray, float3 n, float tMax = BIGFLOAT, int hitSide = HIT_FRONT_AND_BACK);

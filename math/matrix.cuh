@@ -129,9 +129,9 @@ public:
 
     static Matrix Translation(const float3 v) {
         Matrix m;
-        m.cells[9] += v.x;
-        m.cells[10] += v.y;
-        m.cells[11] += v.z;
+        m.cells[9] = v.x;
+        m.cells[10] = v.y;
+        m.cells[11] = v.z;
         return m;
     }
 

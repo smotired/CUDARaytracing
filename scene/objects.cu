@@ -65,3 +65,26 @@ __device__ bool Sphere::IntersectRay(Ray &ray, const int hitSide = HIT_FRONT_AND
 
 	return false;
 }
+
+__device__ bool Sphere::IntersectShadowRay(const ShadowRay &ray, const float tMax = BIGFLOAT, const int hitSide = HIT_FRONT_AND_BACK) const {
+	// Mostly the same logic as above, except that we don't care to calculate where exactly it hits.
+	if (hitSide == HIT_NONE) return false;
+	if (ray.dir % ray.pos >= 0)
+		return false;
+	const float a = ray.dir % ray.dir;
+	const float b = ray.dir % ray.pos * 2;
+	const float c = ray.pos % ray.pos - 1;
+	const float determinant = b * b - 4 * a * c;
+	if (determinant < 0) return false;
+	// Definitely hits the sphere at some point
+
+	// Calculate the solutions to the quadratic formula.
+	const float sqrtDeterminant = sqrtf(determinant);
+	const float front = (-b - sqrtDeterminant) / (2 * a);
+	const float back = (-b + sqrtDeterminant) / (2 * a);
+
+	// Calculate hits for other sides
+	if (hitSide & HIT_FRONT && front >= 0 && front <= tMax) return true;
+	if (hitSide & HIT_BACK && back >= 0 && back <= tMax) return true;
+	return false;
+}

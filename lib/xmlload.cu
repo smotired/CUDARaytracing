@@ -129,7 +129,8 @@ void Scene::Load( Loader const &sceneLoader )
 	// Allocate memory for the materials and lights list -- do this first so objects can reference them
 	cudaMallocManaged(&materials, sizeof(Material) * materialCount);
 	printf("BaseMtl Pointer: %p\n", materials);
-	new (&materials[0]) Material(); // Create a default material in the first slow
+	for (size_t i = 0; i < materialCount; i++)
+		new (&materials[i]) Material(); // Create a default material for each slot
 	cudaMallocManaged(&lights, sizeof(Light) * lightCount);
 
 	auto *materialTable = new unsigned int[2 * materialCount];
@@ -200,7 +201,7 @@ void AssignNodes( Loader const &loader, Node* nodeList, int& next, const Matrix&
 			scale = Matrix::Scale(s);
 		} else if ( L == "rotate" ) {
 			float3 s;
-			L.ReadFloat3(s);
+			L.ReadFloat3(s, F3_UP);
 			float a = 0.0f;
 			L.ReadFloat(a,"angle");
 			rotation = Matrix::Rotation(asNorm(s),a);
@@ -231,7 +232,7 @@ void Camera::Load( Loader const &loader )
 	loader.Child("target"   ).ReadFloat3( target       );
 	loader.Child("up"       ).ReadFloat3( up        );
 	loader.Child("fov"      ).ReadFloat( fov       );
-	const float3 dir = target - position;
+	const float3 dir = asNorm(target - position);
 	const float3 x = cross(dir, up);
 	up = asNorm(cross(x, dir));
 }
@@ -254,14 +255,12 @@ void RenderInfo::Load( Loader const &loader ) {
 	loader.Child("target"   ).ReadFloat3( camTarget       );
 	loader.Child("up"       ).ReadFloat3( camUp        );
 	loader.Child("fov"      ).ReadFloat( camFov       );
-	const float3 dir = camTarget - camPos;
-	const float3 x = cross(dir, camUp);
-	const float3 up = asNorm(cross(x, dir));
-	const float focaldist = length(dir);
 
-	cZ = asNorm(dir);
-	cY = asNorm(up);
-	cX = cross(cZ, cY);
+	const float focaldist = length(camTarget - camPos);
+
+	cZ = asNorm(camTarget - camPos);
+	cX = cross(cZ, asNorm(camUp));
+	cY = cross(cX, cZ);
 
 	const float planeHeight = 2 * focaldist * tanf(fovRad * 0.5f);
 	plane = float3(planeHeight * aspectRatio, planeHeight, focaldist);

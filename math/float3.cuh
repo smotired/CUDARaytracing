@@ -9,7 +9,7 @@
 #define copyfloat3(from) make_float3(from.x, from.y, from.z)
 
 // Default vectors
-#define F3_ZERO float3(1.0f, 0.0f, 0.0f)
+#define F3_ZERO float3(0.0f, 0.0f, 0.0f)
 #define F3_RIGHT float3(1.0f, 0.0f, 0.0f)
 #define F3_UP float3(0.0f, 1.0f, 0.0f)
 #define F3_FORWARD float3(0.0f, 0.0f, 1.0f)
@@ -24,6 +24,13 @@
 /// <returns>The negated vector</returns>
 __host__ __device__ inline float3 operator-(const float3 a) {
     return make_float3(-a.x, -a.y, -a.z);
+}
+
+/// <summary>
+/// Check vector equality
+/// </summary>
+__host__ __device__ inline bool operator==(const float3 a, const float3 b) {
+    return a.x == b.x && a.y == b.y && a.z == b.z;
 }
 
 /// <summary>
@@ -127,7 +134,7 @@ __host__ __device__ inline float operator%(const float3 a, const float3 b) {
 /// <param name="b">The second vector.</param>
 /// <returns>The cross product of the two vectors.</returns>
 __host__ __device__ inline float3 cross(const float3 a, const float3 b) {
-    return F3_RIGHT * (a.y * b.z - b.y * a.z) + F3_UP * (a.x * b.z - b.x * a.z) + F3_FORWARD * (a.x * b.y - b.x * a.y);
+    return F3_RIGHT * (a.y * b.z - b.y * a.z) - F3_UP * (a.x * b.z - b.x * a.z) + F3_FORWARD * (a.x * b.y - b.x * a.y);
 }
 
 /// <summary>

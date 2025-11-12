@@ -6,7 +6,7 @@
 
 int main () {
     Renderer renderer;
-    renderer.LoadScene("scenes/proj2/disk.xml");
+    renderer.LoadScene("scenes/proj3/cmyk.xml");
     ShowViewport(&renderer, false);
 
     return 0;

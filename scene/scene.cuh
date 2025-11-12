@@ -172,6 +172,18 @@ struct Node {
         itm.TransformNormal(ray.hit.n);
     }
 
+    // Transform a shadow ray from world space to local space
+    __host__ __device__ void ToLocal(ShadowRay& ray) const {
+        itm.TransformPosition(ray.pos);
+        itm.TransformDirection(ray.dir);
+    }
+
+    // Transform a shadow ray from local space to world space
+    __host__ __device__ void FromLocal(ShadowRay& ray) const {
+        tm.TransformPosition(ray.pos);
+        tm.TransformDirection(ray.dir);
+    }
+
     // Load the node into the scene
     void Load( Loader const &loader );
 };

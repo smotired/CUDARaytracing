@@ -82,6 +82,20 @@ struct Ray {
     }
 };
 
+struct ShadowRay {
+    // Origin of the ray
+    float3 pos;
+
+    // Direction of the ray
+    float3 dir;
+
+    // Initialize a ray
+    __host__ __device__ void Init(const float3 p, const float3 d) {
+        pos = p;
+        dir = d;
+    }
+};
+
 /// <summary>
 /// Minimum and maximum corners of a node
 /// </summary>
