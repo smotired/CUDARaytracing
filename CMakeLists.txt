@@ -7,7 +7,7 @@ add_executable(cuda_raytracing main.cu
         math/float3.cuh
         math/color.cuh
         math/matrix.cuh
-        scene/structs.cuh
+        scene/scene.cuh
         scene/objects.cu
         scene/objects.cuh
         lib/xmlload.cu
@@ -22,6 +22,8 @@ add_executable(cuda_raytracing main.cu
         renderer/renderer.cuh
         math/color.cu
         lib/lodepng.cuh
+        scene/lights.cuh
+        scene/rays.cuh
 )
 
 find_package(OpenGL REQUIRED)

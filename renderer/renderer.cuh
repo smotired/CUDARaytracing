@@ -5,7 +5,7 @@
 #include "../lib/lodepng.cuh"
 #include "../math/float3.cuh"
 #include "../math/color.cuh"
-#include "../scene/structs.cuh"
+#include "../scene/scene.cuh"
 #include "../scene/objects.cuh"
 
 // Program macros

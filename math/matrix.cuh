@@ -97,31 +97,23 @@ public:
     }
 
     /// <summary>
-    /// Multiply by another matrix. The other matrix goes FIRST in this calculation
+    /// Multiply two matrices together.
     /// </summary>
-    Matrix operator*(const Matrix& first) const {
+    friend Matrix operator*(const Matrix& left, const Matrix& right) {
         Matrix product{};
-        product.cells[0] = first.cells[0] * cells[0] + first.cells[3] * cells[1] + first.cells[6] * cells[2];
-        product.cells[1] = first.cells[1] * cells[0] + first.cells[4] * cells[1] + first.cells[7] * cells[2];
-        product.cells[2] = first.cells[2] * cells[0] + first.cells[5] * cells[1] + first.cells[8] * cells[2];
-        product.cells[3] = first.cells[0] * cells[3] + first.cells[3] * cells[4] + first.cells[6] * cells[5];
-        product.cells[4] = first.cells[1] * cells[3] + first.cells[4] * cells[4] + first.cells[7] * cells[5];
-        product.cells[5] = first.cells[2] * cells[3] + first.cells[5] * cells[4] + first.cells[8] * cells[5];
-        product.cells[6] = first.cells[0] * cells[6] + first.cells[3] * cells[7] + first.cells[6] * cells[8];
-        product.cells[7] = first.cells[1] * cells[6] + first.cells[4] * cells[7] + first.cells[7] * cells[8];
-        product.cells[8] = first.cells[2] * cells[6] + first.cells[5] * cells[7] + first.cells[8] * cells[8];
-        product.cells[9] = first.cells[0] * cells[9] + first.cells[3] * cells[10] + first.cells[6] * cells[11];
-        product.cells[10] = first.cells[1] * cells[9] + first.cells[4] * cells[10] + first.cells[7] * cells[11];
-        product.cells[11] = first.cells[2] * cells[9] + first.cells[5] * cells[10] + first.cells[8] * cells[11];
+        product.cells[0] = left.cells[0] * right.cells[0] + left.cells[3] * right.cells[1] + left.cells[6] * right.cells[2];
+        product.cells[1] = left.cells[1] * right.cells[0] + left.cells[4] * right.cells[1] + left.cells[7] * right.cells[2];
+        product.cells[2] = left.cells[2] * right.cells[0] + left.cells[5] * right.cells[1] + left.cells[8] * right.cells[2];
+        product.cells[3] = left.cells[0] * right.cells[3] + left.cells[3] * right.cells[4] + left.cells[6] * right.cells[5];
+        product.cells[4] = left.cells[1] * right.cells[3] + left.cells[4] * right.cells[4] + left.cells[7] * right.cells[5];
+        product.cells[5] = left.cells[2] * right.cells[3] + left.cells[5] * right.cells[4] + left.cells[8] * right.cells[5];
+        product.cells[6] = left.cells[0] * right.cells[6] + left.cells[3] * right.cells[7] + left.cells[6] * right.cells[8];
+        product.cells[7] = left.cells[1] * right.cells[6] + left.cells[4] * right.cells[7] + left.cells[7] * right.cells[8];
+        product.cells[8] = left.cells[2] * right.cells[6] + left.cells[5] * right.cells[7] + left.cells[8] * right.cells[8];
+        product.cells[9] = left.cells[0] * right.cells[9] + left.cells[3] * right.cells[10] + left.cells[6] * right.cells[11] + left.cells[9];
+        product.cells[10] = left.cells[1] * right.cells[9] + left.cells[4] * right.cells[10] + left.cells[7] * right.cells[11] + left.cells[10];
+        product.cells[11] = left.cells[2] * right.cells[9] + left.cells[5] * right.cells[10] + left.cells[8] * right.cells[11] + left.cells[11];
         return product;
-    }
-
-    /// <summary>
-    /// Multiply this matrix by another matrix. The other matrix would go first in the multiplication
-    /// </summary>
-    void operator*=(const Matrix& first) {
-        Matrix product = first * *this;
-        std::copy(product.cells, product.cells + 12, cells);
     }
 
     // Transformation Methods

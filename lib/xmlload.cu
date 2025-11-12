@@ -20,7 +20,7 @@
 
 //-------------------------------------------------------------------------------
 
-Sphere theSphere;
+Sphere* theSphere; // Will be managed
 
 //-------------------------------------------------------------------------------
 
@@ -31,6 +31,11 @@ void AssignNodes( Loader const& loader, Node* nodeList, int& next, const Matrix&
 
 bool Renderer::LoadScene( char const *filename )
 {
+	// Allocate the sphere
+	cudaMallocManaged(&theSphere, sizeof(Sphere));
+	new (theSphere) Sphere();
+
+	// Load the document
 	tinyxml2::XMLDocument doc;
 	tinyxml2::XMLError e = doc.LoadFile(filename);
 
@@ -72,7 +77,7 @@ bool Renderer::LoadScene( char const *filename )
 void Scene::Load( Loader const &sceneLoader )
 {
 	// First count up nodes
-	size_t nodeCount = 1; // for a default root node
+	nodeCount = 1; // for a default root node
 	for ( Loader loader : sceneLoader ) {
 		if ( loader == "object" ) {
 			nodeCount += CountNodes( loader );
@@ -80,14 +85,16 @@ void Scene::Load( Loader const &sceneLoader )
 	}
 
 	// Allocate memory for the node list
-	nodes = new Node[nodeCount];
 	cudaMallocManaged(&nodes, sizeof(Node) * nodeCount);
+	for (size_t i = 0; i < nodeCount; i++)
+		new (&nodes[i]) Node(); // Create a new node
 	Matrix ident;
 
 	// Assign nodes in depth-first order
 	int next = 1; // index of next element
 	for ( Loader loader : sceneLoader ) {
 		if ( loader == "object" ) {
+			nodes[0].childCount++;
 			AssignNodes(loader, nodes, next, ident);
 		}
 	}
@@ -110,38 +117,39 @@ void AssignNodes( Loader const &loader, Node* nodeList, int& next, const Matrix&
 	// type
 	Loader::String type = loader.Attribute("type");
 	if ( type ) {
-		if ( type == "sphere" ) node->object = &theSphere;
+		if ( type == "sphere" ) node->object = theSphere;
 		else printf("ERROR: Unknown object type %s\n", static_cast<char const*>(type));
 	}
 
-	if ( node->object ) node->object->Load(loader);	// loads object-specific parameters (if any)
+	if ( HAS_OBJ(node->object) ) cuda::std::visit([&loader](const auto &object){ object->Load(loader); }, node->object);	// loads object-specific parameters (if any)
 
 	// Apply transformations
-	node->tm *= parentTransform;
+	Matrix translation, rotation, scale;
 	for ( Loader L : loader ) {
 		if ( L == "scale" ) {
 			float3 s;
 			L.ReadFloat3(s, F3_ONE);
-			node->tm *= Matrix::Scale(s);
+			scale = Matrix::Scale(s);
 		} else if ( L == "rotate" ) {
 			float3 s;
 			L.ReadFloat3(s);
 			float a = 0.0f;
 			L.ReadFloat(a,"angle");
-			node->tm *= Matrix::Rotation(norm(s),a);
+			rotation = Matrix::Rotation(norm(s),a);
 		} else if ( L == "translate" ) {
 			float3 t;
 			L.ReadFloat3(t);
-			node->tm *= Matrix::Translation(t);
+			translation = Matrix::Translation(t);
 		}
 	}
-
-	// Setup inverse matrix again
+	// Transform the parent matrix
+	node->tm = parentTransform * translation * rotation * scale;
 	node->itm = node->tm.GetInverse();
 
 	// Recurse to children
 	for ( Loader L : loader ) {
 		if ( L == "object" ) {
+			node->childCount++;
 			AssignNodes(L, nodeList, next, node->tm);
 		}
 	}

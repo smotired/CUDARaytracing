@@ -1,10 +1,10 @@
-#include "structs.cuh"
+#include "scene.cuh"
 #include "objects.cuh"
 
 #define EPS 0.000001f
 #define OVERPI 0.318309f // 1 / pi
 
-bool Sphere::IntersectRay(Ray &ray, const int hitSide = HIT_FRONT_AND_BACK) const {
+__device__ bool Sphere::IntersectRay(Ray &ray, const int hitSide = HIT_FRONT_AND_BACK) const {
 	// Assume that if HIT_NONE is provided we should always return false.
 	if (hitSide == HIT_NONE) return false;
 

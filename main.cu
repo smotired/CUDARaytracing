@@ -6,7 +6,7 @@
 
 int main () {
     Renderer renderer;
-    renderer.LoadScene("scenes/proj1/ball.xml");
+    renderer.LoadScene("scenes/proj1/snowman.xml");
     ShowViewport(&renderer, false);
 
     return 0;

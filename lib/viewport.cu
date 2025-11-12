@@ -21,7 +21,7 @@
 #include <stdlib.h>
 #include <time.h>
 
-#include "../scene/structs.cuh"
+#include "../scene/scene.cuh"
 #include "../scene/objects.cuh"
 #include "../math/color.cuh"
 #include "../renderer/renderer.cuh"
@@ -204,8 +204,7 @@ void DrawNode( Node const *node )
 	node->tm.As4x4(matrix);
 	glMultMatrixf( matrix );
 
-	const Object *obj = node->object;
-	if ( obj ) obj->ViewportDisplay();
+	if (HAS_OBJ(node->object)) cuda::std::visit([](const auto &object){ object->ViewportDisplay(); }, node->object);
 
 	// This is not recursive anymore
 	/* for ( int i=0; i<node->GetNumChild(); i++ ) {

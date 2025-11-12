@@ -2,6 +2,8 @@
 #pragma once
 #include <cuda_runtime.h>
 
+#define BIGFLOAT 3.402823466e+38f
+
 // Shorthand for make_float3
 #define float3(x, y, z) make_float3(x, y, z)
 #define copyfloat3(from) make_float3(from.x, from.y, from.z)
