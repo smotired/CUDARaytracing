@@ -20,7 +20,7 @@
 
 //-------------------------------------------------------------------------------
 
-Sphere* theSphere; // Will be managed
+Sphere* theSphere; // Will point to managed memory
 
 //-------------------------------------------------------------------------------
 
@@ -176,6 +176,32 @@ void RenderInfo::Load( Loader const &loader ) {
 	loader.Child("height"   ).ReadInt  ( h );
 	width = w;
 	height = h;
+
+	// Also calculate information from the camera info
+    const float aspectRatio = (float)theScene.render.width / (float)theScene.render.height;
+    const float fovRad = theScene.camera.fov * DEG2RAD;
+	float3 camPos, camTarget, camUp;
+	float camFov;
+	loader.Child("position" ).ReadFloat3( camPos       );
+	loader.Child("target"   ).ReadFloat3( camTarget       );
+	loader.Child("up"       ).ReadFloat3( camUp        );
+	loader.Child("fov"      ).ReadFloat( camFov       );
+	const float3 dir = camTarget - camPos;
+	const float3 x = cross(dir, camUp);
+	const float3 up = norm(cross(x, dir));
+	const float focaldist = length(dir);
+
+	cZ = norm(dir);
+	cY = norm(up);
+	cX = cross(cZ, cY);
+
+	const float planeHeight = 2 * focaldist * tanf(fovRad * 0.5f);
+	plane = float3(planeHeight * aspectRatio, planeHeight, focaldist);
+	pixelSize = planeHeight / (float)theScene.render.height;
+
+	const float3 planeCenter = theScene.camera.position + focaldist * cZ;
+	const float3 topLeftCorner = planeCenter - (plane.x * 0.5f * cX) + (plane.y * 0.5f * cY);
+	topLeftPixel = topLeftCorner + pixelSize * 0.5f * (cX - cY);
 }
 
 //-------------------------------------------------------------------------------

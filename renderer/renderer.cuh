@@ -8,18 +8,27 @@
 #include "../scene/scene.cuh"
 #include "../scene/objects.cuh"
 
-// Program macros
-#define RAY_THREADS_PER_BLOCK_X 16
-
 // Rendering macros
 #define BIAS 0.0001f;
 #define BOUNCES 8;
 // #define SAMPLE_MIN 4;
 // #define SAMPLE_MAX 64;
 
+// Program macros
+#define RAY_THREADS_PER_BLOCK_X 16
+
+inline cudaError_t err = cudaSuccess; // Global variable to ensure these macros always work.
+
+// Check a specific call for an error
+#define CERR(fn) err = fn; \
+    if (err != cudaSuccess) printf("CUDA error: %s\n", cudaGetErrorString(err))
+
+// Check the last error
+#define CLERR() CERR(cudaGetLastError())
+
 //-------------------------------------------------------------------
 
-// Information about the completed image (probably host only?)
+// Information about the completed image -- host only
 
 struct RenderedImage {
     unsigned int width; unsigned int height;
@@ -46,24 +55,34 @@ struct RenderedImage {
 
 __managed__ extern Scene theScene;
 
+/// <summary>
+/// The renderer is in charge of actually rendering the scene
+/// </summary>
 class Renderer {
+    // Name of the scene file
     char const* sceneFile;
+
+    // The image that we rendered
     RenderedImage image;
 
+    // If we are currently rendering
     bool rendering = false;
-
 public:
+    // Load the scene with this filename
     bool LoadScene(const char* filename);
 
+    // Get a reference to the image file
     [[nodiscard]] const RenderedImage& GetImage() const { return image; }
+
+    // Get the scene filename
     [[nodiscard]] std::string SceneFileName() const { return sceneFile; }
 
     [[nodiscard]] bool IsRendering() const { return rendering; }
     void BeginRendering();
     void StopRendering();
 
+    // Convert the RenderImage's z buffer to a black and white image for display
     void ComputeZBufferImage() { ComputeImage<float,true>( image.zBuffer, image.zBufferImg, BIGFLOAT ); }
-
 private:
     // Compute a black and white image
     template <typename T, bool invert>

@@ -40,6 +40,20 @@ struct RenderInfo {
     // Primary ray counts per pixel
     // unsigned int* sampleCounts;
 
+    // Extra information that is constant for all rays:
+
+    // Size of a single pixel in world space
+    float pixelSize;
+
+    // Unit vectors for camera.
+    float3 cX, cY, cZ;
+
+    // Image plane. X and Y are width and height, Z is distance from camera along cZ.
+    float3 plane;
+
+    // World space coordinates of the pixel in the top left corner. Used to calculate offset of remaining pixels.
+    float3 topLeftPixel;
+
     // Load the RenderInfo
     void Load( Loader const &loader );
 };

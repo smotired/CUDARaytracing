@@ -19,7 +19,7 @@
 #endif
 
 #include <stdlib.h>
-#include <time.h>
+#include <chrono>
 
 #include "../scene/scene.cuh"
 #include "../scene/objects.cuh"
@@ -61,7 +61,7 @@ Renderer *theRenderer = nullptr;
 
 //-------------------------------------------------------------------------------
 
-#define WINDOW_TITLE        "Ray Tracer - CS 6620"
+#define WINDOW_TITLE        "CUDA Ray Tracer"
 #define WINDOW_TITLE_OPENGL WINDOW_TITLE " - OpenGL"
 #define WINDOW_TITLE_IMAGE  WINDOW_TITLE " - Rendered Image"
 #define WINDOW_TITLE_Z      WINDOW_TITLE " - Z (Depth) Image"
@@ -84,10 +84,10 @@ enum MouseMode {
 	MOUSEMODE_DEBUG,
 };
 
-static Mode      mode      = MODE_READY;		// Rendering mode
-static ViewMode	 viewMode  = VIEWMODE_OPENGL;	// Display mode
-static MouseMode mouseMode = MOUSEMODE_NONE;	// Mouse mode
-static int       startTime;						// Start time of rendering
+static Mode      mode      = MODE_READY;		                // Rendering mode
+static ViewMode	 viewMode  = VIEWMODE_OPENGL;	                // Display mode
+static MouseMode mouseMode = MOUSEMODE_NONE;                	// Mouse mode
+static std::chrono::high_resolution_clock::time_point start;	// Start time of rendering
 static GLuint    viewTexture;
 static bool      closeWhenDone;
 
@@ -357,6 +357,8 @@ void GlutDisplay()
 
 void GlutIdle()
 {
+	const RenderedImage &image = theRenderer->GetImage();
+
 	// static int lastRenderedPixels = 0;
 	if ( mode == MODE_RENDERING ) {
 		// int nrp = renderImage.GetNumRenderedPixels();
@@ -364,12 +366,18 @@ void GlutIdle()
 			// lastRenderedPixels = nrp;
 			if ( !theRenderer->IsRendering() ) {
 				if ( ! closeWhenDone ) mode = MODE_RENDER_DONE;
-				int endTime = (int) time(nullptr);
-				int t = endTime - startTime;
-				int h = t / 3600;
-				int m = (t % 3600) / 60;
-				int s = t % 60;
-				printf("\nRender time is %d:%02d:%02d.\n",h,m,s);
+				auto end = std::chrono::high_resolution_clock::now();
+				auto duration = std::chrono::duration_cast<std::chrono::microseconds>(end - start).count();
+
+				int h = duration / 3600000000;
+				int m = (duration % 3600000000) / 60000000;
+				int s = (duration % 60000000) / 1000000;
+				int mus = duration % 1000000;
+				printf("\nRender time is %d:%02d:%02d.%06d.\n",h,m,s,mus);
+
+				theRenderer->ComputeZBufferImage();
+				image.SaveImage("output.png");
+				image.SaveZBufferImage("outputZ.png");
 			}
 			glutPostRedisplay();
 		// }
@@ -440,7 +448,7 @@ void GlutKeyboard2( int key, int x, int y )
 	case GLUT_KEY_F1:
 		terminal_clear();
 		printf("The following keys and mouse events are supported:\n");
-		printf(uiControlsString);
+		printf("%s", uiControlsString);
 		break;
 	case GLUT_KEY_F5:
 		if ( mode == MODE_RENDERING ) {
@@ -522,7 +530,7 @@ void BeginRendering( int value )
 	glutSetWindowTitle(WINDOW_TITLE_IMAGE);
 	DrawScene(true);
 	glReadPixels( 0, 0, image.width, image.height, GL_RGB, GL_UNSIGNED_BYTE, image.pixels );
-	startTime = (int) time(nullptr);
+	start = std::chrono::high_resolution_clock::now();
 	theRenderer->BeginRendering();
 	closeWhenDone = value;
 }

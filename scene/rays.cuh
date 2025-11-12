@@ -4,7 +4,7 @@
 #include "../math/matrix.cuh"
 #include "../math/color.cuh"
 
-class Node;
+struct Node;
 class Material;
 
 // Hit sides
