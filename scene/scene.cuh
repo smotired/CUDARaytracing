@@ -115,9 +115,9 @@ struct Scene {
 
 class Material {
 public:
-    color diffuse = BLACK;  // How much light is scattered
+    color diffuse = WHITE;  // How much light is scattered
     color specular = WHITE; // How much light is reflected
-    float glossiness = 512;              // Smoothness of the surface
+    float glossiness = 20;  // Smoothness of the surface
 
     [[nodiscard]] __device__ color Shade(Ray const& ray) const;
     void SetViewportMaterial( int mtlID=0 ) const {} // used for OpenGL display
@@ -135,7 +135,7 @@ struct Node {
     ObjectPtr object;
 
     // The material associated with this node
-    Material* material;
+    const Material* material;
 
     // The bounding box of this object.
     Box boundingBox{};
@@ -153,17 +153,6 @@ struct Node {
         tm = Matrix();
         itm = Matrix();
         boundingBox = Box();
-        childCount = 0;
-    }
-
-    // Construct a node
-    Node(ObjectPtr obj, Material* mat, const Matrix &transformation) {
-        object = obj;
-        material = mat;
-        tm = transformation;
-        itm = transformation.GetInverse();
-        Box objectBoundingBox = HAS_OBJ(obj) ? cuda::std::visit([](const auto &object) { return object->GetBoundBox(); }, object) : Box();
-        boundingBox = Box(tm * objectBoundingBox.pmin, tm * objectBoundingBox.pmax);
         childCount = 0;
     }
 

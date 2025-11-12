@@ -20,6 +20,8 @@
 
 //-------------------------------------------------------------------------------
 
+#include <functional>
+
 #include "tinyxml2.cuh"
 #include "../math/color.cuh"
 

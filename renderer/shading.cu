@@ -4,7 +4,7 @@
 __device__ color Material::Shade(Ray const& ray) const {
     color total = BLACK;
     float3 l; // Direction to some light source
-    float3 v = norm(ray.dir); // View direction
+    float3 v = asNorm(ray.dir); // View direction
     const Hit &hit = ray.hit; // Reference to the hit so we can pass it to lights
 
     // Loop through lights in the light list
@@ -22,12 +22,12 @@ __device__ color Material::Shade(Ray const& ray) const {
             color intensity = LIGHT_ILLUMINATE(light, hit, l);
 
             // Blinn shading: Compute half vector
-            float3 h = norm(l + v);
+            float3 h = asNorm(l + v);
 
             // Compute cos(theta) (angle between light source and normal)
             // and cos(phi) (angle between normal vector and half vector)
-            float cos_theta = l % n;
-            float cos_phi = h % n;
+            float cos_theta = l % hit.n;
+            float cos_phi = h % hit.n;
 
             // Add colors if the surface is lit
             if (cos_theta > 0) {
@@ -39,5 +39,5 @@ __device__ color Material::Shade(Ray const& ray) const {
         }
     }
 
-    return color;
+    return total;
 }

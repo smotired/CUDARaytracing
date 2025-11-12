@@ -152,10 +152,20 @@ __host__ __device__ inline float length(const float3 a) {
 /// Calculate the normalzed form of a vector
 /// </summary>
 /// <param name="a">The vector.</param>
-/// <returns>The length of the vector.</returns>
-__host__ __device__ inline float3 norm(const float3 a) {
+/// <returns>The normalized vector.</returns>
+__host__ __device__ inline float3 asNorm(const float3 a) {
     float scale = 1.0f / sqrtf(a % a);
     return scale * a;
+}
+
+/// <summary>
+/// Normalize a vector in place.
+/// </summary>
+/// <param name="a">The vector.</param>
+/// <returns>The vector, normalized in place</returns>
+__host__ __device__ inline void doNorm(float3& a) {
+    float scale = 1.0f / sqrtf(a % a);
+    a *= scale;
 }
 
 /// <summary>Set values on a float3.</summary>

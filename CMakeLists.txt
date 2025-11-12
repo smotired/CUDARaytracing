@@ -13,7 +13,7 @@ set(SRC_MAIN
 
 set(SRC_IO
         lib/lodepng.cu
-        ib/tinyxml2.cu
+        lib/tinyxml2.cu
         lib/viewport.cu
         lib/xmlload.cu
 )

@@ -6,7 +6,7 @@
 
 int main () {
     Renderer renderer;
-    renderer.LoadScene("scenes/proj1/snowman.xml");
+    renderer.LoadScene("scenes/proj2/disk.xml");
     ShowViewport(&renderer, false);
 
     return 0;

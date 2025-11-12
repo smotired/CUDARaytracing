@@ -50,7 +50,7 @@ struct Hit {
     // Transform a hit with a matrix
     __host__ __device__ void Transform(const Matrix& tm) {
         pos = tm * pos;
-        n = norm(tm % n);
+        n = asNorm(tm % n);
     }
 };
 
