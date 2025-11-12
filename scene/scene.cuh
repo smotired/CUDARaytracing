@@ -157,13 +157,19 @@ struct Node {
     }
 
     // Transform a ray from world space to local space
-    void ToLocal(Ray& ray) const {
-        ray.Transform(tm);
+    __host__ __device__ void ToLocal(Ray& ray) const {
+        itm.TransformPosition(ray.pos);
+        itm.TransformDirection(ray.dir);
+        itm.TransformPosition(ray.hit.pos);
+        tm.TransformNormal(ray.hit.n);
     }
 
     // Transform a ray from local space to world space
-    void FromLocal(Ray& ray) const {
-        ray.Transform(itm);
+    __host__ __device__ void FromLocal(Ray& ray) const {
+        tm.TransformPosition(ray.pos);
+        tm.TransformDirection(ray.dir);
+        tm.TransformPosition(ray.hit.pos);
+        itm.TransformNormal(ray.hit.n);
     }
 
     // Load the node into the scene

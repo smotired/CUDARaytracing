@@ -3,39 +3,47 @@
 
 __device__ color Material::Shade(Ray const& ray) const {
     color total = BLACK;
-    float3 l; // Direction to some light source
-    float3 v = asNorm(ray.dir); // View direction
+    float3 v = asNorm(-ray.dir); // View direction
     const Hit &hit = ray.hit; // Reference to the hit so we can pass it to lights
 
     // Loop through lights in the light list
     for (int i = 0; i < theScene.lightCount; i++) {
+        float3 l = F3_ZERO; // Direction to the light source
         const Light* light = theScene.lights + i;
+        // Get intensity and direction
+        color intensity = LIGHT_ILLUMINATE(light, hit, l);
+        DEBUG_PRINT("Light %d intensity: %.2f,%.2f,%.2f, direction: %.2f,%.2f,%.2f\n", i, intensity.x, intensity.y, intensity.z, l.x, l.y, l.z);
 
         // Ambient lights
         if (LIGHT_ISAMBIENT(light)) {
-            total += diffuse * LIGHT_ILLUMINATE(light, hit, l);
+            color amb = diffuse * intensity;
+            DEBUG_PRINT("Light %d Contribution: %.2f,%.2f,%.2f (ambient)\n", i, amb.x, amb.y, amb.z);
+            total += amb;
+            DEBUG_PRINT("Current total: %.2f,%.2f,%.2f\n", total.x, total.y, total.x);
         }
 
         // Non-ambient lights
         else {
-            // Get intensity and direction
-            color intensity = LIGHT_ILLUMINATE(light, hit, l);
-
             // Blinn shading: Compute half vector
             float3 h = asNorm(l + v);
+            DEBUG_PRINT("v: %.2f,%.2f,%.2f\n", v.x, v.y, v.z);
+            DEBUG_PRINT("h: %.2f,%.2f,%.2f\n", h.x, h.y, h.z);
 
             // Compute cos(theta) (angle between light source and normal)
             // and cos(phi) (angle between normal vector and half vector)
-            float cos_theta = l % hit.n;
-            float cos_phi = h % hit.n;
+            const float cos_theta = l % hit.n;
+            const float cos_phi = h % hit.n;
+            DEBUG_PRINT("cos_theta: %.2f, cos_phi:%.2f\n", cos_theta, cos_phi);
 
             // Add colors if the surface is lit
-            if (cos_theta > 0) {
-                color thisDiffuse = intensity * diffuse * cos_theta;
-                color thisSpecular = intensity * specular * powf(cos_phi, glossiness);
+            if (cos_theta >= 0) {
+                color diff = intensity * diffuse * cos_theta;
+                color spec = intensity * specular * powf(cos_phi, glossiness);
+                DEBUG_PRINT("Light %d Contribution: %.2f,%.2f,%.2f (diffuse), %.2f,%.2f,%.2f (specular)\n", i, diff.x, diff.y, diff.z, spec.x, spec.y, spec.z);
 
-                total += thisDiffuse + thisSpecular;
+                total += diff + spec;
             }
+            DEBUG_PRINT("Current total: %.2f,%.2f,%.2f\n", total.x, total.y, total.x);
         }
     }
 

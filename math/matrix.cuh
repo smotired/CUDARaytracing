@@ -69,22 +69,31 @@ public:
     /// Multiply the matrix by the vector. Reperesents a position transformation.
     /// </summary>
     /// <param name="v">The vector to transform.</param>
-    /// <returns>The transformed vector.</returns>
-    __host__ __device__ inline float3 operator*(const float3 v) const {
-        return float3(cells[0] * v.x + cells[3] * v.y + cells[6] * v.z + cells[9],
-                      cells[1] * v.x + cells[4] * v.y + cells[7] * v.z + cells[10],
-                      cells[2] * v.x + cells[5] * v.y + cells[8] * v.z + cells[11]);
+    __host__ __device__ inline void TransformPosition(float3& v) const {
+        set(v, cells[0] * v.x + cells[3] * v.y + cells[6] * v.z + cells[9],
+                  cells[1] * v.x + cells[4] * v.y + cells[7] * v.z + cells[10],
+                  cells[2] * v.x + cells[5] * v.y + cells[8] * v.z + cells[11]);
     }
 
     /// <summary>
-    /// Multiply the matrix by the vector, excluding the fourth column. Reperesents a direction transformation.
+    /// Multiply the matrix by the vector, excluding the translation component. Reperesents a direction transformation.
     /// </summary>
     /// <param name="v">The vector to transform.</param>
-    /// <returns>The transformed vector.</returns>
-    __host__ __device__ inline float3 operator%(const float3 v) const {
-        return float3(cells[0] * v.x + cells[3] * v.y + cells[6] * v.z,
-                      cells[1] * v.x + cells[4] * v.y + cells[7] * v.z,
-                      cells[2] * v.x + cells[5] * v.y + cells[8] * v.z);
+    __host__ __device__ inline void TransformDirection(float3& v) const {
+        set(v, cells[0] * v.x + cells[3] * v.y + cells[6] * v.z,
+                  cells[1] * v.x + cells[4] * v.y + cells[7] * v.z,
+                  cells[2] * v.x + cells[5] * v.y + cells[8] * v.z);
+    }
+
+    /// <summary>
+    /// Multiply the transposed matrix by the vector, excluding the translation component. Reperesents a normal vector transformation.
+    /// </summary>
+    /// <param name="v">The normal to transform.</param>
+    __host__ __device__ inline void TransformNormal(float3& v) const {
+        set(v, cells[0] * v.x + cells[1] * v.y + cells[2] * v.z,
+                  cells[3] * v.x + cells[4] * v.y + cells[5] * v.z,
+                  cells[6] * v.x + cells[7] * v.y + cells[8] * v.z);
+        doNorm(v);
     }
 
     /// <summary>
@@ -119,7 +128,7 @@ public:
     // Transformation Methods
 
     static Matrix Translation(const float3 v) {
-        Matrix m{};
+        Matrix m;
         m.cells[9] += v.x;
         m.cells[10] += v.y;
         m.cells[11] += v.z;
@@ -128,7 +137,7 @@ public:
 
     static Matrix Rotation(const float3 axis, float degrees) {
         // This is also from Cem's code
-        Matrix m{};
+        Matrix m;
 
         const float rad = DEG2RAD * degrees;
         const float sina = sinf(rad);
@@ -149,13 +158,13 @@ public:
         m.cells[ 5] = tyz + s.x;
         m.cells[ 6] = txz + s.y;
         m.cells[ 7] = tyz - s.x;
-        m.cells[ 8] = a.z * axis.z + sina;
+        m.cells[ 8] = a.z * axis.z + cosa;
 
         return m;
     }
 
     static Matrix Scale(const float3 s) {
-        Matrix m{};
+        Matrix m;
         m.cells[0] = s.x;
         m.cells[4] = s.y;
         m.cells[8] = s.z;

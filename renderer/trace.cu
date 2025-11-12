@@ -19,10 +19,16 @@ __global__ void DispatchPrimaryRays() {
     DEBUG_PRINT("pI: %d, pCoords: %.2f,%.2f,%.2f\n", pI, pixelCoords.x, pixelCoords.y, pixelCoords.z);
     DEBUG_PRINT("START CAST\n");
     Ray ray(theScene.camera.position, pixelCoords - theScene.camera.position, pI);
+    ray.pos += ray.dir * BIAS;
     DEBUG_PRINT("RayO: %.2f,%.2f,%.2f, RayD: %.2f,%.2f,%.2f\n", ray.pos.x, ray.pos.y, ray.pos.z, ray.dir.x, ray.dir.y, ray.dir.z);
-    const bool hit = TraceRay(ray);
+    const bool hit = TraceRay(ray, HIT_FRONT);
     DEBUG_PRINT("DID HIT: %d\n", hit);
-    if (hit) DEBUG_PRINT("HIT POS: %.2f,%.2f,%.2f\n", ray.hit.pos.x, ray.hit.pos.y, ray.hit.pos.z);
+    if (hit) {
+        DEBUG_PRINT("HIT POS: %.2f,%.2f,%.2f\n", ray.hit.pos.x, ray.hit.pos.y, ray.hit.pos.z);
+        DEBUG_PRINT("HIT Z: %.2f\n", ray.hit.z);
+        DEBUG_PRINT("HIT N: %.2f,%.2f,%.2f\n", ray.hit.n.x, ray.hit.n.y, ray.hit.n.z);;
+        DEBUG_PRINT("HIT FRONT: %d\n", ray.hit.front);
+    }
 
     DEBUG_PRINT("START SHADE\n");
     color sample = color(0, 0, 0.1f); // Dark blue if we hit nothing
@@ -45,7 +51,7 @@ __device__ bool TraceRay(Ray &ray, int hitSide) {
         Node* node = theScene.nodes + i;
         if (HAS_OBJ(node->object)) {
             // Trace a ray
-            ray.Transform(node->itm);
+            node->ToLocal(ray);
             const bool hit = cuda::std::visit(
                 [&ray, hitSide](const auto &object) { return object->IntersectRay(ray, hitSide); }, node->object);
 
@@ -54,7 +60,7 @@ __device__ bool TraceRay(Ray &ray, int hitSide) {
                 ray.hit.node = node;
                 hitAnything = true;
             }
-            ray.Transform(node->tm);
+            node->FromLocal(ray);
         }
     }
     return hitAnything;

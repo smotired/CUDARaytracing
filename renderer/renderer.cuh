@@ -24,8 +24,10 @@ inline cudaError_t err = cudaSuccess; // Global variable to ensure these macros 
 // Check the last error
 #define CLERR() CERR(cudaGetLastError())
 // Target pixels for debugging
-#define DEBUG_X -1
-#define DEBUG_Y -1
+ #define DEBUG_X (-1)
+ #define DEBUG_Y (-1)
+// #define DEBUG_X 750
+// #define DEBUG_Y 360
 #define DEBUG ((DEBUG_X | DEBUG_Y) >= 0)
 #define DEBUG_PRINT(...) if (DEBUG) printf(__VA_ARGS__)
 #define DEBUG_KERNEL(blocks, threads, kernel, ...) \

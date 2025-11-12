@@ -46,12 +46,6 @@ struct Hit {
         front = true;
         node = nullptr;
     }
-
-    // Transform a hit with a matrix
-    __host__ __device__ void Transform(const Matrix& tm) {
-        pos = tm * pos;
-        n = asNorm(tm % n);
-    }
 };
 
 struct Ray {
@@ -85,13 +79,6 @@ struct Ray {
         pixel = pI;
         contribution = cont;
         hit.Init();
-    }
-
-    // Transform a ray with a matrix
-    __host__ __device__ void Transform(const Matrix& tm) {
-        pos = tm * pos;
-        dir = tm % dir;
-        hit.Transform(tm);
     }
 };
 

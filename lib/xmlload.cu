@@ -277,9 +277,9 @@ void RenderInfo::Load( Loader const &loader ) {
 void LoadLight( Loader const& loader, Light* lightList, int i ) {
 	Loader::String type = loader.Attribute("type");
 	Light *light = lightList + i;
-	if      ( type == "ambient" ) new (light) AmbientLight;
-	else if ( type == "direct"  ) new (light) DirectionalLight;
-	else if ( type == "point"   ) new (light) PointLight;
+	if      (type == "ambient") *light = AmbientLight();
+	else if (type == "direct")  *light = DirectionalLight();
+	else if (type == "point")   *light = PointLight();
 	else {
 		printf("ERROR: Unknown light type %s\n", static_cast<char const*>(type));
 		return;
@@ -297,7 +297,7 @@ void AmbientLight::Load( Loader const& loader ) {
 
 void DirectionalLight::Load( Loader const& loader ) {
 	loader.Child("intensity").ReadColor( intensity );
-	loader.Child("direction").ReadColor( direction );
+	loader.Child("direction").ReadFloat3( direction );
 	doNorm(direction);
 }
 
@@ -305,7 +305,7 @@ void DirectionalLight::Load( Loader const& loader ) {
 
 void PointLight::Load( Loader const& loader ) {
 	loader.Child("intensity").ReadColor( intensity );
-	loader.Child("position").ReadColor( position );
+	loader.Child("position").ReadFloat3( position );
 }
 
 //-------------------------------------------------------------------------------
