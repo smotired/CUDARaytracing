@@ -49,7 +49,7 @@ __device__ void Material::Shade(const uint3 blockIdx, Ray const& ray) const {
     // This isn't perfect and only works if all objects are enclosed entirely
 
     // Atomically the ray's contribution from direct lighting to the color. Eventually this will ONLY be the material's emission.
-    const color contribution = direct * exp(relevantAbsorption * -distance) * ray.contribution;
+    const color contribution = direct * exp(relevantAbsorption * -distance * 0.5f) * ray.contribution; // No idea if 0.5f for absorption is right
     atomicAdd(&theScene.render.results[ray.pixel].x, contribution.x);
     atomicAdd(&theScene.render.results[ray.pixel].y, contribution.y);
     atomicAdd(&theScene.render.results[ray.pixel].z, contribution.z);
