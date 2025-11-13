@@ -74,6 +74,10 @@ __device__ void TraceRay(const uint3 blockIdx, Ray &ray, int hitSide) {
     // Add some bias
     ray.pos += ray.dir * BIAS;
 
+    // Initialize a hit
+    Hit hit;
+    hit.Init();
+
     // Loop through the object list
     bool hitAnything = false;
     for (int i = 0; i < theScene.nodeCount; i++) {
@@ -81,26 +85,23 @@ __device__ void TraceRay(const uint3 blockIdx, Ray &ray, int hitSide) {
         if (HAS_OBJ(node->object)) {
             // Trace a ray
             node->ToLocal(ray);
-            const bool hit = cuda::std::visit(
-                [&ray, hitSide](const auto &object) { return object->IntersectRay(ray, hitSide); }, node->object);
 
-            if (hit) {
-                // Apply the node
-                ray.hit.node = node;
+            // Check for intersection and transform hit
+            if (OBJ_INTERSECT(*node->object, ray, hit, hitSide)) {
                 hitAnything = true;
+                node->FromLocal(hit);
             }
             node->FromLocal(ray);
         }
     }
 
     // Shade, or add color from environment. Assume no hit means no absorption.
-    if (hitAnything) ray.hit.node->material->Shade(blockIdx, ray);
+    if (hitAnything) hit.node->material->Shade(blockIdx, ray, hit);
     else theScene.render.results[ray.pixel] += ray.contribution * color(0, 0, 0.1f);
 
     // If this is a primary ray, update the Z buffer
-    if (ray.IsPrimary() && hitAnything) {
-        theScene.render.zBuffer[ray.pixel] = fmin(theScene.render.zBuffer[ray.pixel], ray.hit.z);
-    }
+    if (ray.IsPrimary() && hitAnything)
+        theScene.render.zBuffer[ray.pixel] = fmin(theScene.render.zBuffer[ray.pixel], hit.z);
 }
 
 __device__ bool TraceShadowRay(ShadowRay& ray, const float3 n, const float tMax, const int hitSide) {
@@ -114,9 +115,8 @@ __device__ bool TraceShadowRay(ShadowRay& ray, const float3 n, const float tMax,
             // Trace a ray
             node->ToLocal(ray);
 
-            const bool hit = cuda::std::visit(
-                [&ray, tMax, hitSide](const auto &object) { return object->IntersectShadowRay(ray, tMax, hitSide); }, node->object);
-            if (hit) return true;
+            if (OBJ_INTSHADOW(*node->object, ray, tMax, hitSide))
+                return true;
 
             node->FromLocal(ray);
         }
