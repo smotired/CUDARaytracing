@@ -4,7 +4,7 @@
 #define EPS 0.000001f
 #define OVERPI 0.318309f // 1 / pi
 
-__device__ bool Sphere::IntersectRay(Ray &ray, const int hitSide = HIT_FRONT_AND_BACK) const {
+__device__ bool Sphere::IntersectRay(Ray const &ray, Hit& hit, const int hitSide = HIT_FRONT_AND_BACK) const {
 	// Assume that if HIT_NONE is provided we should always return false.
 	if (hitSide == HIT_NONE) return false;
 
@@ -36,15 +36,15 @@ __device__ bool Sphere::IntersectRay(Ray &ray, const int hitSide = HIT_FRONT_AND
 		// Don't render if the front intersection is behind the camera, unless we should check for a back hit.
 		if (front >= 0) {
 			// If this is less close than the existing hit, return false (the back hit also will be)
-			if (front >= ray.hit.z) return false;
+			if (front >= hit.z) return false;
 
 			// Set the value for t into the z buffer.
-			ray.hit.z = front;
+			hit.z = front;
 
 			// Calculate hit position and normal vector, in object space.
-			ray.hit.pos = ray.pos + front * ray.dir;
-			ray.hit.n = ray.hit.pos; // unit sphere is a special case.
-			ray.hit.front = true;
+			hit.pos = ray.pos + front * ray.dir;
+			hit.n = hit.pos; // unit sphere is a special case.
+			hit.front = true;
 
 			return true;
 		}
@@ -54,11 +54,11 @@ __device__ bool Sphere::IntersectRay(Ray &ray, const int hitSide = HIT_FRONT_AND
 	if (hitSide & HIT_BACK) {
 		// Same logic as before.
 		if (back < 0) return false;
-		if (back >= ray.hit.z) return false;
-		ray.hit.z = back;
-		ray.hit.pos = ray.pos + back * ray.dir;
-		ray.hit.n = ray.hit.pos;
-		ray.hit.front = false;
+		if (back >= hit.z) return false;
+		hit.z = back;
+		hit.pos = ray.pos + back * ray.dir;
+		hit.n = hit.pos;
+		hit.front = false;
 
 		return true;
 	}
@@ -89,7 +89,7 @@ __device__ bool Sphere::IntersectShadowRay(const ShadowRay &ray, const float tMa
 	return false;
 }
 
-__device__ bool Plane::IntersectRay(Ray &ray, const int hitSide = HIT_FRONT_AND_BACK) const {
+__device__ bool Plane::IntersectRay(Ray const& ray, Hit& hit, const int hitSide = HIT_FRONT_AND_BACK) const {
 	// Assume that if HIT_NONE is provided we should always return false.
 	if (hitSide == HIT_NONE) return false;
 
@@ -113,10 +113,10 @@ __device__ bool Plane::IntersectRay(Ray &ray, const int hitSide = HIT_FRONT_AND_
 		return false;
 
 	// Set up the hit info
-	ray.hit.z = t;
-	ray.hit.pos = hitPos;
-	ray.hit.n = F3_FORWARD; // the plane is z up
-	ray.hit.front = ray.dir.z < 0;
+	hit.z = t;
+	hit.pos = hitPos;
+	hit.n = F3_FORWARD; // the plane is z up
+	hit.front = ray.dir.z < 0;
 	return true;
 }
 
