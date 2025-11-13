@@ -1,6 +1,6 @@
 #include "vector.cuh"
 
-__device__ inline void orthonormals(const float3 n, float3& x, float3& y) {
+__device__ void orthonormals(const float3 n, float3& x, float3& y) {
     // Copied from Cem's code
     if (n.z >= n.y) {
         const float a =  1.0f / (1.0f + n.z);
@@ -15,11 +15,11 @@ __device__ inline void orthonormals(const float3 n, float3& x, float3& y) {
     }
 }
 
-__device__ inline float3 reflect(const float3 incident, const float3 normal) {
+__device__ float3 reflect(const float3 incident, const float3 normal) {
     return 2 * (incident % normal) * normal - incident;
 }
 
-__device__ inline float3 transmit(const float3 incident, const float3 normal, const float outerIor, const float innerIor, bool& totalInnerReflection) {
+__device__ float3 transmit(const float3 incident, const float3 normal, const float outerIor, const float innerIor, bool& totalInnerReflection) {
     const float cos_theta = incident % normal;
 
     // Calculate eta, the ratio of IORs, from snell's law. Equal to sin phi / sin theta.
@@ -33,5 +33,5 @@ __device__ inline float3 transmit(const float3 incident, const float3 normal, co
     }
 
     totalInnerReflection = false;
-    return -normal * sqrtf(cos_phi_squared); + eta * (cos_theta * normal - incident);
+    return -normal * sqrtf(cos_phi_squared) + eta * (cos_theta * normal - incident);
 }

@@ -31,9 +31,11 @@ __global__ void DispatchRows() {
             const unsigned int pI = (row * RAY_ITERSIZE * theScene.render.width) + (col * RAY_ITERSIZE) + fpI;
             const float3 pixel = firstPixel +theScene.render.pixelSize * RAY_ITERSIZE * (col * theScene.render.cX - row * theScene.render.cY);
 
-            // Enqueue the ray
-            if (!finished)
+            // Enqueue the primary ray and set up z buffer
+            if (!finished) {
                 rayQueue.Enqueue(blockIdx, Ray(theScene.camera.position, pixel - theScene.camera.position, pI));
+                theScene.render.zBuffer[pI] = BIGFLOAT;
+            }
 
             while (true) {
                 // Wait for all the threads to be ready
@@ -57,7 +59,7 @@ __global__ void DispatchRows() {
                 while (!finished) {
                     Ray* ray = rayQueue.Dequeue(blockIdx);
                     if (ray == nullptr) break;
-                    TraceRay(*ray); // Will enqueue rays as needed
+                    TraceRay(blockIdx, *ray); // Will enqueue rays as needed
                 }
                 // The queue is exhausted, so loop back until all threads acknowledge that.
             }
@@ -66,7 +68,7 @@ __global__ void DispatchRows() {
     }
 }
 
-__device__ void TraceRay(Ray &ray, int hitSide) {
+__device__ void TraceRay(const uint3 blockIdx, Ray &ray, int hitSide) {
     // Add some bias
     ray.pos += ray.dir * BIAS;
 
@@ -90,11 +92,13 @@ __device__ void TraceRay(Ray &ray, int hitSide) {
     }
 
     // Shade, or add color from environment. Assume no hit means no absorption.
-    if (hitAnything) ray.hit.node->material->Shade(ray);
+    if (hitAnything) ray.hit.node->material->Shade(blockIdx, ray);
     else theScene.render.results[ray.pixel] += ray.contribution * color(0, 0, 0.1f);
 
     // If this is a primary ray, update the Z buffer
-    if (ray.IsPrimary()) theScene.render.zBuffer[ray.pixel] = fmin(theScene.render.zBuffer[ray.pixel], ray.hit.z);
+    if (ray.IsPrimary() && hitAnything) {
+        theScene.render.zBuffer[ray.pixel] = fmin(theScene.render.zBuffer[ray.pixel], ray.hit.z);
+    }
 }
 
 __device__ bool TraceShadowRay(ShadowRay& ray, const float3 n, const float tMax, const int hitSide) {

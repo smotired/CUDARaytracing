@@ -75,9 +75,9 @@ struct Ray {
         hit.Init();
     }
 
-    __device__ inline bool IsPrimary() { return bounce == 0; }
+    __device__ bool IsPrimary() const { return bounce == 0; }
 
-    __device__ inline bool CanBounce() { return bounce + 1 < BOUNCES; }
+    __device__ bool CanBounce() const { return bounce + 1 < BOUNCES; }
 };
 
 struct ShadowRay {
