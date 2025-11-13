@@ -5,9 +5,8 @@
 #include "vector.cuh"
 #include "../scene/scene.cuh"
 
-__device__ void Material::Shade(const uint3 blockIdx, Ray const& ray) const {
+__device__ void Material::Shade(const uint3 blockIdx, Ray const& ray, Hit const& hit) const {
     float3 v = asNorm(-ray.dir); // View direction
-    const Hit &hit = ray.hit; // Reference to the hit so we can pass it to lights
 
     // Calculate color contribution from direct lighting
     color direct = BLACK;
@@ -53,7 +52,6 @@ __device__ void Material::Shade(const uint3 blockIdx, Ray const& ray) const {
     atomicAdd(&theScene.render.results[ray.pixel].x, contribution.x);
     atomicAdd(&theScene.render.results[ray.pixel].y, contribution.y);
     atomicAdd(&theScene.render.results[ray.pixel].z, contribution.z);
-
 
     // Trace indirect light
     if (!ray.CanBounce()) return;
