@@ -124,7 +124,7 @@ public:
     color absorption = BLACK; // How much light is absorbed
     float ior = 1;
 
-    __device__ void Shade(const uint3 blockIdx, Ray const& ray) const;
+    __device__ void Shade(const uint3 blockIdx, Ray const& ray, Hit const& hit) const;
     void SetViewportMaterial( int mtlID=0 ) const {} // used for OpenGL display
     void Load( Loader const &loader ) { /* Will do something later */ }
 };
@@ -165,16 +165,12 @@ struct Node {
     __host__ __device__ void ToLocal(Ray& ray) const {
         itm.TransformPosition(ray.pos);
         itm.TransformDirection(ray.dir);
-        itm.TransformPosition(ray.hit.pos);
-        tm.TransformNormal(ray.hit.n);
     }
 
     // Transform a ray from local space to world space
     __host__ __device__ void FromLocal(Ray& ray) const {
         tm.TransformPosition(ray.pos);
         tm.TransformDirection(ray.dir);
-        tm.TransformPosition(ray.hit.pos);
-        itm.TransformNormal(ray.hit.n);
     }
 
     // Transform a shadow ray from world space to local space
@@ -187,6 +183,13 @@ struct Node {
     __host__ __device__ void FromLocal(ShadowRay& ray) const {
         tm.TransformPosition(ray.pos);
         tm.TransformDirection(ray.dir);
+    }
+
+    // Transform a ray's hit from local space to world space
+    __host__ __device__ void FromLocal(Hit& hit) const {
+        tm.TransformPosition(hit.pos);
+        itm.TransformNormal(hit.n);
+        hit.node = this;
     }
 
     // Load the node into the scene
