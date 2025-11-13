@@ -55,9 +55,6 @@ struct Ray {
     // Direction of the ray
     float3 dir;
 
-    // Hit position of the ray
-    Hit hit;
-
     // Pixel index (y * width + x) of the ray
     unsigned int pixel = 0;
 
@@ -72,7 +69,6 @@ struct Ray {
 
     __host__ __device__ Ray(const float3 pos, const float3 dir, const unsigned int pixel, const unsigned int bounce = 0, const color contribution = WHITE, const color absorption = BLACK) :
         pos(pos), dir(dir), pixel(pixel), bounce(bounce), contribution(contribution), absorption(absorption) {
-        hit.Init();
     }
 
     __device__ bool IsPrimary() const { return bounce == 0; }
