@@ -11,7 +11,7 @@ __global__ void DispatchRows() {
     const float3 firstPixel = theScene.render.topLeftPixel
         + theScene.render.pixelSize * (pX * theScene.render.cX - pY * theScene.render.cY);
 
-    // If the start pixel is already out of bounds, we can just quit. Only happens on the far right and bottom edge of the images.
+    // If the start pixel is already out of bounds, we can just quit. Only happens here on very slow images.
     bool finished = false;
     if (pX >= theScene.render.width || pY >= theScene.render.height)
         finished = true; // We can't just return because of control flow requirements with __syncthreads().
@@ -65,6 +65,8 @@ __global__ void DispatchRows() {
             }
             // Move on to the next iteration
         }
+        // At the end of a row, we might not be done anymore.
+        finished = false;
     }
 }
 
