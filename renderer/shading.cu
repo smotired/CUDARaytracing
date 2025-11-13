@@ -43,14 +43,17 @@ __device__ void Material::Shade(const uint3 blockIdx, Ray const& ray) const {
         }
     }
 
-    // Absorption -- On a front hit, use the ray's absorption from the previous medium. On a back hit, use the absorption from the material we hit.
+    // Absorption -- On a front hit, use the ray's absorption from the previous medium. On a back hit, use the absorpt ion from the material we hit.
     const float distance = length(ray.hit.pos - ray.pos);
     const color relevantAbsorption = hit.front ? ray.absorption : absorption;
-    direct *= exp(relevantAbsorption * -distance);
     // This isn't perfect and only works if all objects are enclosed entirely
 
-    // Add the ray's contribution from direct lighting to the color. Eventually this will ONLY be the material's emission.
-    theScene.render.results[ray.pixel] += direct * ray.contribution;
+    // Atomically the ray's contribution from direct lighting to the color. Eventually this will ONLY be the material's emission.
+    const color contribution = direct * exp(relevantAbsorption * -distance) * ray.contribution;
+    atomicAdd(&theScene.render.results[ray.pixel].x, contribution.x);
+    atomicAdd(&theScene.render.results[ray.pixel].y, contribution.y);
+    atomicAdd(&theScene.render.results[ray.pixel].z, contribution.z);
+
 
     // Trace indirect light
     if (!ray.CanBounce()) return;
