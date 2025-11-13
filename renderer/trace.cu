@@ -1,60 +1,69 @@
 #include "trace.cuh"
-#include "renderer.cuh"
+
+__managed__ RayQueue rayQueue;
 
 __global__ void DispatchRows() {
-    // Each thread is responsible for 1 pixel in each iteration, and iterations will be 16 * n lines tall for some int n.
-    // So pX remains constant, and pY jumps by (rowHeight * rowsPerIteration) each time.
+    // Each thread is responsible for 1 pixel in the block, across each iteration.
     // Define coords of starting pixel
-    const unsigned int pX = blockIdx.x * blockDim.x + threadIdx.x;
+    const unsigned int pX = blockIdx.x * blockDim.x + threadIdx.x; // We only have 1 block right now
     const unsigned int pY = blockIdx.y * blockDim.y + threadIdx.y;
     const unsigned int fpI = pY * theScene.render.width + pX;
     const float3 firstPixel = theScene.render.topLeftPixel
         + theScene.render.pixelSize * (pX * theScene.render.cX - pY * theScene.render.cY);
 
-    // If the start pixel is already out of bounds, we can just quit. Only happens on the far right of images where
-    // width is not divisible by block size, or at the bottom of images with height less than itersize.
+    // If the start pixel is already out of bounds, we can just quit. Only happens on the far right and bottom edge of the images.
+    bool finished = false;
     if (pX >= theScene.render.width || pY >= theScene.render.height)
-        return;
+        finished = true; // We can't just return because of control flow requirements with __syncthreads().
 
     // Find out just how many pixels we are responsible for
-    const size_t rowCount = (theScene.render.height + ITERSIZE - 1) / ITERSIZE;
+    const size_t colCount = (theScene.render.width + RAY_ITERSIZE - 1) / RAY_ITERSIZE;
+    const size_t rowCount = (theScene.render.height + RAY_ITERSIZE - 1) / RAY_ITERSIZE;
 
-    // Cast rays for each row
+    // Cast rays for each row and column
     for (int row = 0; row < rowCount; row++) {
-        // If this pixel is out of bounds, we're done.
-        if (row * ITERSIZE + pY >= theScene.render.height) return;
+        for (int col = 0; col < colCount; col++) {
+            // If this pixel is out of bounds, we're done.
+            if ((pX + RAY_ITERSIZE * col) >= theScene.render.width || (pY + RAY_ITERSIZE * row) >= theScene.render.height)
+                finished = true;
 
-        // Calculate index and coordinates of the pixel by adding ITERSIZE rows
-        const unsigned int pI = row * ITERSIZE * theScene.render.width + fpI;
-        const float3 pixel = firstPixel - theScene.render.pixelSize * row * ITERSIZE * theScene.render.cY;
+            // Calculate index and coordinates of the pixel by adding BLOCKDIM * BLOCKCOUNT rows
+            const unsigned int pI = (row * RAY_ITERSIZE * theScene.render.width) + (col * RAY_ITERSIZE) + fpI;
+            const float3 pixel = firstPixel +theScene.render.pixelSize * RAY_ITERSIZE * (col * theScene.render.cX - row * theScene.render.cY);
 
-        // Trace the ray, and add secondary rays to a queue
-        Ray ray(theScene.camera.position, pixel - theScene.camera.position, pI);
-        TraceRay(ray, HIT_FRONT);
+            // Enqueue the ray
+            if (!finished)
+                rayQueue.Enqueue(blockIdx, Ray(theScene.camera.position, pixel - theScene.camera.position, pI));
+
+            while (true) {
+                // Wait for all the threads to be ready
+                __syncthreads();
+
+                // If this is the first thread in the block, swap the queues and reset
+                if (threadIdx.x == 0 && threadIdx.y == 0) {
+                    rayQueue.SwapQueues(blockIdx);
+                }
+
+                // Wait for all the threads to be ready
+                __syncthreads();
+
+                // If the read queue is empty, all threads can break out of this loop.
+                if (rayQueue.IsEmpty(blockIdx)) break;
+
+                // All threads must finish that check before we can start dequeuing.
+                __syncthreads();
+
+                // If we aren't offscreen, dequeue rays until the queue is exhausted
+                while (!finished) {
+                    Ray* ray = rayQueue.Dequeue(blockIdx);
+                    if (ray == nullptr) break;
+                    TraceRay(*ray); // Will enqueue rays as needed
+                }
+                // The queue is exhausted, so loop back until all threads acknowledge that.
+            }
+            // Move on to the next iteration
+        }
     }
-
-
-
-
-
-
-
-
-    /**
-    const unsigned int pI = pY * theScene.render.width + pX;
-
-    // Return if we are out of bounds
-    if (pX >= theScene.render.width || pY >= theScene.render.height)
-        return;
-
-    // Get the world-space coordinates of this pixel on the screen
-    const float3 pixelCoords = theScene.render.topLeftPixel
-        + theScene.render.pixelSize * (pX * theScene.render.cX - pY * theScene.render.cY);
-
-    // Create and cast a ray
-    Ray ray(theScene.camera.position, pixelCoords - theScene.camera.position, pI);
-    TraceRay(ray, HIT_FRONT);
-    **/
 }
 
 __device__ void TraceRay(Ray &ray, int hitSide) {

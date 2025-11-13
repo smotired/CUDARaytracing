@@ -128,7 +128,6 @@ void Scene::Load( Loader const &sceneLoader )
 
 	// Allocate memory for the materials and lights list -- do this first so objects can reference them
 	cudaMallocManaged(&materials, sizeof(Material) * materialCount);
-	printf("BaseMtl Pointer: %p\n", materials);
 	for (size_t i = 0; i < materialCount; i++)
 		new (&materials[i]) Material(); // Create a default material for each slot
 	cudaMallocManaged(&lights, sizeof(Light) * lightCount);

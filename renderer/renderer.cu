@@ -1,4 +1,3 @@
-#include "renderer.cuh"
 #include "trace.cuh"
 
 // The scene that we are rendering
@@ -16,12 +15,25 @@ void Renderer::BeginRendering() {
     CERR(cudaMalloc(&theScene.render.zBuffer, sizeof(float) * size));
 
     // Set up the thread count
-    const unsigned int xBlocks = (theScene.render.width + RAY_THREADS_PER_BLOCK_X - 1) / RAY_THREADS_PER_BLOCK_X;
-    const unsigned int yBlocks = ROWS_PER_ITERATION;
-    dim3 numBlocks(xBlocks, yBlocks);
-    dim3 threadsPerBlock(RAY_THREADS_PER_BLOCK_X, RAY_THREADS_PER_BLOCK_X);
+    dim3 numBlocks(RAY_BLOCKCOUNT, RAY_BLOCKCOUNT);
+    dim3 threadsPerBlock(RAY_BLOCKDIM, RAY_BLOCKDIM);
+
+    // Allocate enough space for the ray queues. We will have 2 queues, each with enough room for RAY_QUEUE_SIZE rays per pixel going at once.
+    printf("Allocating queue...\n");
+    cudaMalloc(&rayQueue.rays, sizeof(Ray) * 2 * SINGLE_QUEUE_SIZE * RAY_BLOCKCOUNT * RAY_BLOCKCOUNT);
+    cudaMallocManaged(&rayQueue.readIdxs, sizeof(unsigned int) * RAY_BLOCKCOUNT * RAY_BLOCKCOUNT);
+    cudaMallocManaged(&rayQueue.writeIdxs, sizeof(unsigned int) * RAY_BLOCKCOUNT * RAY_BLOCKCOUNT);
+    cudaMallocManaged(&rayQueue.endIdxs, sizeof(unsigned int) * RAY_BLOCKCOUNT * RAY_BLOCKCOUNT);
+    cudaMallocManaged(&rayQueue.maxIdxs, sizeof(unsigned int) * RAY_BLOCKCOUNT * RAY_BLOCKCOUNT);
+
+    // Setup iteration variables for the ray queue
+    printf("Initializing blocks...\n");
+    for (unsigned int x = 0; x < RAY_BLOCKCOUNT; x++)
+        for (unsigned int y = 0; y < RAY_BLOCKCOUNT; y++)
+            rayQueue.Init(make_uint3(x, y, 0));
 
     // Launch kernel
+    printf("Launching kernel...\n");
     DispatchRows<<<numBlocks, threadsPerBlock>>>();
     CLERR();
     CERR(cudaDeviceSynchronize());
@@ -35,8 +47,8 @@ void Renderer::BeginRendering() {
     Color24 *converted;
     CERR(cudaMalloc(&converted, sizeof(Color24) * size));
 
-    unsigned int convBlocks = (size + RAY_THREADS_PER_BLOCK_X - 1) / RAY_THREADS_PER_BLOCK_X;
-    unsigned int convThreads = RAY_THREADS_PER_BLOCK_X * RAY_THREADS_PER_BLOCK_X;
+    unsigned int convBlocks = (size + RAY_BLOCKDIM - 1) / RAY_BLOCKDIM;
+    unsigned int convThreads = RAY_BLOCKDIM * RAY_BLOCKDIM;
     printf("Converting colors...\n");
     ConvertColors<<<convBlocks, convThreads>>>(theScene.render.results, converted, size);
     CLERR();
