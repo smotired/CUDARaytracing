@@ -10,8 +10,9 @@
 
 // Program macros
 #define RAY_THREADS_PER_BLOCK_X 16
-#define ROWS_PER_ITERATION 1
-#define RAY_QUEUE_SIZE 1000000 // trace 1 million rays at a time
+#define ROWS_PER_ITERATION 8
+#define ITERSIZE (RAY_THREADS_PER_BLOCK_X*ROWS_PER_ITERATION)
+#define RAY_QUEUE_SIZE 10000 // How many total secondary rays can come from each pixel at a time.
 inline cudaError_t err = cudaSuccess; // Global variable to ensure these macros always work.
 // Check a specific call for an error
 #define CERR(fn) \

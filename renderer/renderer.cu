@@ -17,12 +17,12 @@ void Renderer::BeginRendering() {
 
     // Set up the thread count
     const unsigned int xBlocks = (theScene.render.width + RAY_THREADS_PER_BLOCK_X - 1) / RAY_THREADS_PER_BLOCK_X;
-    const unsigned int yBlocks = (theScene.render.height + RAY_THREADS_PER_BLOCK_X - 1) / RAY_THREADS_PER_BLOCK_X;
+    const unsigned int yBlocks = ROWS_PER_ITERATION;
     dim3 numBlocks(xBlocks, yBlocks);
     dim3 threadsPerBlock(RAY_THREADS_PER_BLOCK_X, RAY_THREADS_PER_BLOCK_X);
 
     // Launch kernel
-    DispatchPrimaryRays<<<numBlocks, threadsPerBlock>>>();
+    DispatchRows<<<numBlocks, threadsPerBlock>>>();
     CLERR();
     CERR(cudaDeviceSynchronize());
     printf("Primary rays finished.\n");

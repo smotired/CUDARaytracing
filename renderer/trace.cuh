@@ -3,7 +3,7 @@
 #include "rays.cuh"
 
 // Fire primary rays from the camera origin to the center of the plane
-__global__ void DispatchPrimaryRays();
+__global__ void DispatchRows();
 
 // Trace a ray through the scene and calculate the returned color
 __device__ void TraceRay(Ray& ray, int hitSide = HIT_FRONT_AND_BACK);

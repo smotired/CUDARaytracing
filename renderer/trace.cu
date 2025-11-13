@@ -1,9 +1,46 @@
 #include "trace.cuh"
 #include "renderer.cuh"
 
-__global__ void DispatchPrimaryRays() {
+__global__ void DispatchRows() {
+    // Each thread is responsible for 1 pixel in each iteration, and iterations will be 16 * n lines tall for some int n.
+    // So pX remains constant, and pY jumps by (rowHeight * rowsPerIteration) each time.
+    // Define coords of starting pixel
     const unsigned int pX = blockIdx.x * blockDim.x + threadIdx.x;
     const unsigned int pY = blockIdx.y * blockDim.y + threadIdx.y;
+    const unsigned int fpI = pY * theScene.render.width + pX;
+    const float3 firstPixel = theScene.render.topLeftPixel
+        + theScene.render.pixelSize * (pX * theScene.render.cX - pY * theScene.render.cY);
+
+    // If the start pixel is already out of bounds, we can just quit. Only happens on the far right of images where
+    // width is not divisible by block size, or at the bottom of images with height less than itersize.
+    if (pX >= theScene.render.width || pY >= theScene.render.height)
+        return;
+
+    // Find out just how many pixels we are responsible for
+    const size_t rowCount = (theScene.render.height + ITERSIZE - 1) / ITERSIZE;
+
+    // Cast rays for each row
+    for (int row = 0; row < rowCount; row++) {
+        // If this pixel is out of bounds, we're done.
+        if (row * ITERSIZE + pY >= theScene.render.height) return;
+
+        // Calculate index and coordinates of the pixel by adding ITERSIZE rows
+        const unsigned int pI = row * ITERSIZE * theScene.render.width + fpI;
+        const float3 pixel = firstPixel - theScene.render.pixelSize * row * ITERSIZE * theScene.render.cY;
+
+        // Trace the ray, and add secondary rays to a queue
+        Ray ray(theScene.camera.position, pixel - theScene.camera.position, pI);
+        TraceRay(ray, HIT_FRONT);
+    }
+
+
+
+
+
+
+
+
+    /**
     const unsigned int pI = pY * theScene.render.width + pX;
 
     // Return if we are out of bounds
@@ -17,6 +54,7 @@ __global__ void DispatchPrimaryRays() {
     // Create and cast a ray
     Ray ray(theScene.camera.position, pixelCoords - theScene.camera.position, pI);
     TraceRay(ray, HIT_FRONT);
+    **/
 }
 
 __device__ void TraceRay(Ray &ray, int hitSide) {
