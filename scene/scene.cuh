@@ -153,7 +153,7 @@ struct Node {
 
     // Default constructor
     Node() {
-        object = nullptr;
+        object = (Sphere*)nullptr;
         material = nullptr;
         tm = Matrix();
         itm = Matrix();

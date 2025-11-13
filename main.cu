@@ -6,7 +6,7 @@
 
 int main () {
     Renderer renderer;
-    renderer.LoadScene("scenes/proj4/box.xml");
+    renderer.LoadScene("scenes/proj5/ballbox.xml");
     ShowViewport(&renderer, false);
 
     return 0;

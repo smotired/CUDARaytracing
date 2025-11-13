@@ -204,7 +204,10 @@ void DrawNode( Node const *node )
 	node->tm.As4x4(matrix);
 	glMultMatrixf( matrix );
 
-	if (HAS_OBJ(node->object)) cuda::std::visit([](const auto &object){ object->ViewportDisplay(); }, node->object);
+	if (HAS_OBJ(node->object)) {
+		const Material *mtl = node->material;
+		cuda::std::visit([mtl](const auto &object){ object->ViewportDisplay(mtl); }, node->object);
+	}
 
 	// This is not recursive anymore
 	/* for ( int i=0; i<node->GetNumChild(); i++ ) {
@@ -538,13 +541,41 @@ void BeginRendering( int value )
 //-------------------------------------------------------------------------------
 // Viewport Methods for various classes
 //-------------------------------------------------------------------------------
-void Sphere::ViewportDisplay() const
+void Sphere::ViewportDisplay( Material const *mtl ) const
 {
 	static GLUquadric *q = nullptr;
 	if ( q == nullptr ) {
 		q = gluNewQuadric();
 	}
 	gluSphere(q,1,50,50);
+}
+
+void Plane::ViewportDisplay( Material const *mtl ) const
+{
+	const int resolution = 32;
+	float xyInc = 2.0f / resolution;
+	float uvInc = 1.0f / resolution;
+	glPushMatrix();
+	glNormal3f(0,0,1);
+	glBegin(GL_QUADS);
+	float y1=-1, y2=xyInc-1, v1=0, v2=uvInc;
+	for ( int y=0; y<resolution; y++ ) {
+		float x1=-1, x2=xyInc-1, u1=0, u2=uvInc;
+		for ( int x=0; x<resolution; x++ ) {
+			glTexCoord2f( u1, v1 );
+			glVertex3f  ( x1, y1, 0 );
+			glTexCoord2f( u2, v1 );
+			glVertex3f  ( x2, y1, 0 );
+			glTexCoord2f( u2, v2 );
+			glVertex3f  ( x2, y2, 0 );
+			glTexCoord2f( u1, v2 );
+			glVertex3f  ( x1, y2, 0 );
+			x1=x2; x2+=xyInc; u1=u2; u2+=uvInc;
+		}
+		y1=y2; y2+=xyInc; v1=v2; v2+=uvInc;
+	}
+	glEnd();
+	glPopMatrix();
 }
 
 void GLLight::SetViewportParam( int lightID, color const &ambient, color const &intensity, float4 const &pos ) const

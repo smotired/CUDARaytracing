@@ -21,6 +21,7 @@
 //-------------------------------------------------------------------------------
 
 Sphere* theSphere; // Will point to managed memory
+Plane* thePlane; // Will point to managed memory
 
 //-------------------------------------------------------------------------------
 
@@ -68,9 +69,11 @@ std::hash<std::string> hasher;
 
 bool Renderer::LoadScene( char const *filename )
 {
-	// Allocate the sphere
+	// Allocate the primitives
 	cudaMallocManaged(&theSphere, sizeof(Sphere));
-	new (theSphere) Sphere();
+	theSphere = new Sphere();
+	cudaMallocManaged(&thePlane, sizeof(Plane));
+	thePlane = new Plane();
 
 	// Load the document
 	tinyxml2::XMLDocument doc;
@@ -178,6 +181,7 @@ void AssignNodes( Loader const &loader, Node* nodeList, int& next, const Matrix&
 	Loader::String type = loader.Attribute("type");
 	if ( type ) {
 		if ( type == "sphere" ) node->object = theSphere;
+		else if ( type == "plane" ) node->object = thePlane;
 		else printf("ERROR: Unknown object type %s\n", static_cast<char const*>(type));
 	}
 
@@ -200,7 +204,7 @@ void AssignNodes( Loader const &loader, Node* nodeList, int& next, const Matrix&
 			scale = Matrix::Scale(s);
 		} else if ( L == "rotate" ) {
 			float3 s;
-			L.ReadFloat3(s, F3_UP);
+			L.ReadFloat3(s);
 			float a = 0.0f;
 			L.ReadFloat(a,"angle");
 			rotation = Matrix::Rotation(asNorm(s),a);

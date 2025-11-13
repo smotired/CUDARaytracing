@@ -88,3 +88,58 @@ __device__ bool Sphere::IntersectShadowRay(const ShadowRay &ray, const float tMa
 	if (hitSide & HIT_BACK && back >= 0 && back <= tMax) return true;
 	return false;
 }
+
+__device__ bool Plane::IntersectRay(Ray &ray, const int hitSide = HIT_FRONT_AND_BACK) const {
+	// Assume that if HIT_NONE is provided we should always return false.
+	if (hitSide == HIT_NONE) return false;
+
+	// If ray's z direction is 0, the ray is parallel to the plane.
+	if (ray.dir.z == 0) return false;
+
+	// Find the single point at which the ray intersects the plane
+	const float t = -ray.pos.z / ray.dir.z; // kinda crazy how simple this gets in local space
+
+	// Check that it's visible and the closest hit so far
+	if (t < 0 || t >= ray.hit.z)
+		return false;
+
+	// Check that it intersects the correct side
+	if (!(ray.dir.z < 0 && (hitSide & HIT_FRONT)) && !(ray.dir.z > 0 && (hitSide & HIT_BACK)))
+		return false;
+
+	// Check that it's within the bounds of the plane
+	const float3 hitPos = ray.pos + t * ray.dir;
+	if (std::abs(hitPos.x) > 1 || std::abs(hitPos.y) > 1)
+		return false;
+
+	// Set up the hit info
+	ray.hit.z = t;
+	ray.hit.pos = hitPos;
+	ray.hit.n = F3_FORWARD; // the plane is z up
+	ray.hit.front = ray.dir.z < 0;
+	return true;
+}
+
+__device__ bool Plane::IntersectShadowRay(const ShadowRay &ray, const float tMax = BIGFLOAT, const int hitSide = HIT_FRONT_AND_BACK) const {
+	// Assume that if HIT_NONE is provided we should always return false.
+	if (hitSide == HIT_NONE) return false;
+
+	// If ray's z direction is 0, the ray is parallel to the plane.
+	if (ray.dir.z == 0) return false;
+
+	// Find the single point at which the ray intersects the plane
+	const float t = -ray.pos.z / ray.dir.z; // kinda crazy how simple this gets in local space
+
+	// Check that it's visible and the closest hit so far
+	if (t < 0 || t >= tMax)
+		return false;
+
+	// Check that it intersects the correct side
+	if (!(ray.dir.z < 0 && (hitSide & HIT_FRONT)) && !(ray.dir.z > 0 && (hitSide & HIT_BACK)))
+		return false;
+
+	// Check that it's within the bounds of the plane
+	const float3 hitPos = ray.pos + t * ray.dir;
+	if (std::abs(hitPos.x) > 1 || std::abs(hitPos.y) > 1)
+		return false;
+}
