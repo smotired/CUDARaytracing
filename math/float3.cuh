@@ -197,3 +197,23 @@ __host__ __device__ inline void doNorm(float3& a) {
 __host__ __device__ inline void set(float3& a, const float x, const float y, const float z) {
     a.x = x; a.y = y; a.z = z;
 }
+
+// Index operators
+
+__host__ __device__ inline float& ref(float3& a, const unsigned int i) {
+    switch (i) {
+        case 0: return a.x;
+        case 1: return a.y;
+        case 2: return a.z;
+        default: return a.x;
+    }
+}
+
+__host__ __device__ inline unsigned int& ref(uint3& a, const unsigned int i) {
+    switch (i) {
+        case 0: return a.x;
+        case 1: return a.y;
+        case 2: return a.z;
+        default: return a.x;
+    }
+}

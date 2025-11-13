@@ -27,12 +27,12 @@ set(SRC_RDR
         renderer/renderer.cu
         renderer/trace.cu
         renderer/shading.cu
-        renderer/settings.cuh
 )
 
 set(SRC_SCN
         scene/objects.cu
         scene/lights.cu
+        scene/mesh.cu
 )
 
 # --------------------------------
