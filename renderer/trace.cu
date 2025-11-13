@@ -73,7 +73,6 @@ __device__ bool TraceShadowRay(ShadowRay& ray, const float3 n, const float tMax,
     ray.pos += ray.dir * BIAS + n * BIAS;
 
     // Loop through the object list
-    bool hitAnything = false;
     for (int i = 0; i < theScene.nodeCount; i++) {
         Node* node = theScene.nodes + i;
         if (HAS_OBJ(node->object)) {

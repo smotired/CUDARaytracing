@@ -313,6 +313,10 @@ void LoadMaterial( Loader const& loader, Material* materialList, int i, unsigned
 	loader.Child("diffuse").ReadColor( materialList[i].diffuse );
 	loader.Child("specular").ReadColor( materialList[i].specular );
 	loader.Child("glossiness").ReadFloat( materialList[i].glossiness );
+	loader.Child("reflection").ReadColor( materialList[i].reflection );
+	loader.Child("refraction").ReadColor( materialList[i].refraction );
+	loader.Child("absorption").ReadColor( materialList[i].absorption );
+	loader.Child("glossiness").ReadFloat( materialList[i].glossiness );
 
 	Loader::String name = loader.Attribute("name");
 	InsertMaterial(materialTable, materialCount, HASH(name), i);

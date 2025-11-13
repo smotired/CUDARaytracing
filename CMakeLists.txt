@@ -20,6 +20,7 @@ set(SRC_IO
 
 set(SRC_MATH
         math/color.cu
+        math/vector.cu
 )
 
 set(SRC_RDR

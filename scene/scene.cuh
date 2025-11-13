@@ -119,6 +119,11 @@ public:
     color specular = WHITE; // How much light is reflected
     float glossiness = 20;  // Smoothness of the surface
 
+    color reflection = BLACK; // How much light is directly reflected
+    color refraction = BLACK; // How much light is directly refracted
+    color absorption = BLACK; // How much light is absorbed
+    float ior = 1;
+
     [[nodiscard]] __device__ color Shade(Ray const& ray) const;
     void SetViewportMaterial( int mtlID=0 ) const {} // used for OpenGL display
     void Load( Loader const &loader ) { /* Will do something later */ }

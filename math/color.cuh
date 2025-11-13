@@ -20,6 +20,10 @@ typedef float3 color;
 #define BLACK color(0.0f, 0.0f, 0.0f)
 #define WHITE color(1.0f, 1.0f, 1.0f)
 
+// Methods on colors
+
+__device__ color exp(color col); // e^col
+
 // Integer version from 0-255 that freeglut uses
 
 struct Color24 {

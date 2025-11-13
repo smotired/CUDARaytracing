@@ -34,6 +34,13 @@ __host__ __device__ inline bool operator==(const float3 a, const float3 b) {
 }
 
 /// <summary>
+/// Check vector inequality
+/// </summary>
+__host__ __device__ inline bool operator!=(const float3 a, const float3 b) {
+    return a.x != b.x || a.y != b.y || a.z != b.z;
+}
+
+/// <summary>
 /// Multiply a vector by a scalar
 /// </summary>
 /// <param name="a">The vector</param>
@@ -178,22 +185,4 @@ __host__ __device__ inline void doNorm(float3& a) {
 /// <summary>Set values on a float3.</summary>
 __host__ __device__ inline void set(float3& a, const float x, const float y, const float z) {
     a.x = x; a.y = y; a.z = z;
-}
-
-/// <summary>
-/// Get two unit vectors orthogonal to another normal vector, forming an orthonormal basis.
-/// </summary>
-__host__ __device__ inline void orthonormals(const float3 n, float3& x, float3& y) {
-    // Copied from Cem's code
-    if (n.z >= n.y) {
-        const float a =  1.0f / (1.0f + n.z);
-        const float b = -n.x * n.y * a;
-        set(x, 1.0f - n.x * n.x * a, b, -n.x);
-        set(y, b, 1 - n.y * n.y * a, -n.y);
-    } else {
-        const float a =  1.0f / (1.0f + n.y);
-        const float b = -n.x * n.z * a;
-        set(x, b, -n.z, 1 - n.y * n.y * a );
-        set(y, 1.0f - n.x * n.x * a, -n.x, b);
-    }
 }

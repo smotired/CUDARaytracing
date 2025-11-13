@@ -1,4 +1,6 @@
 #include "renderer.cuh"
+#include "trace.cuh"
+#include "vector.cuh"
 #include "../scene/scene.cuh"
 
 __device__ color Material::Shade(Ray const& ray) const {
@@ -45,6 +47,20 @@ __device__ color Material::Shade(Ray const& ray) const {
             DEBUG_PRINT("Current total: %.2f,%.2f,%.2f\n", total.x, total.y, total.x);
         }
     }
+
+    // Reflections -- must do if either reflection or refraction is enabled, because of fresnel.
+    color reflected = BLACK;
+    /*
+    if (reflection != BLACK || refraction != BLACK) {
+        // Trace a ray in the viewing direction.
+        float3 r = reflect(v, hit.n);
+        Ray reflectionRay(hit.pos, r, ray.pixel);
+        if (TraceRay(reflectionRay)) reflected = reflectionRay.hit.node->material->Shade(reflectionRay);
+        else reflected = color(0, 0, 0.1);
+
+        total += reflection * reflected;
+    }
+    */
 
     return total;
 }

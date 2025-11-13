@@ -6,7 +6,7 @@
 
 int main () {
     Renderer renderer;
-    renderer.LoadScene("scenes/proj3/cmyk.xml");
+    renderer.LoadScene("scenes/proj4/box.xml");
     ShowViewport(&renderer, false);
 
     return 0;
