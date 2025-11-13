@@ -125,6 +125,17 @@ __host__ __device__ inline float3 operator*(const float3 a, const float3 b) {
 }
 
 /// <summary>
+/// Multiply a vector component-wise by another vector
+/// </summary>
+/// <param name="a">The first vector.</param>
+/// <param name="b">The second vector.</param>
+__host__ __device__ inline void operator*=(float3 a, const float3 b) {
+    a.x *= b.x;
+    a.y *= b.y;
+    a.z *= b.z;
+}
+
+/// <summary>
 /// Computes the dot product of two vectors.
 /// </summary>
 /// <param name="a">The first vector.</param>

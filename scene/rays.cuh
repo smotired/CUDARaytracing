@@ -1,8 +1,8 @@
 /// Raycasting info
 #pragma once
-#include "../math/float3.cuh"
-#include "../math/matrix.cuh"
-#include "../math/color.cuh"
+#include "settings.cuh"
+#include "float3.cuh"
+#include "color.cuh"
 
 struct Node;
 class Material;
@@ -59,27 +59,25 @@ struct Ray {
     Hit hit;
 
     // Pixel index (y * width + x) of the ray
-    unsigned int pixel;
+    unsigned int pixel = 0;
+
+    // Current bounce index of the ray
+    unsigned int bounce = 0;
 
     // Contribution of the ray to the final color
-    color contribution;
+    color contribution = WHITE;
 
-    // Initialize a ray
-    __host__ __device__ void Init(const float3 p, const float3 d, const unsigned int pI, const color cont = WHITE) {
-        pos = p;
-        dir = d;
-        pixel = pI;
-        contribution = cont;
+    // Multiplier for contribution based on distance (for absorption)
+    color absorption = BLACK;
+
+    __host__ __device__ Ray(const float3 pos, const float3 dir, const unsigned int pixel, const unsigned int bounce = 0, const color contribution = WHITE, const color absorption = BLACK) :
+        pos(pos), dir(dir), pixel(pixel), bounce(bounce), contribution(contribution), absorption(absorption) {
         hit.Init();
     }
 
-    __host__ __device__ Ray(const float3 p, const float3 d, const unsigned int pI, const color cont = WHITE) {
-        pos = p;
-        dir = d;
-        pixel = pI;
-        contribution = cont;
-        hit.Init();
-    }
+    __device__ inline bool IsPrimary() { return bounce == 0; }
+
+    __device__ inline bool CanBounce() { return bounce + 1 < BOUNCES; }
 };
 
 struct ShadowRay {

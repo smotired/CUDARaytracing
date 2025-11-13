@@ -8,14 +8,10 @@
 #include "../scene/scene.cuh"
 #include "../scene/objects.cuh"
 
-// Rendering macros
-#define BIAS 0.0002f
-#define BOUNCES 8
-// #define SAMPLE_MIN 4
-// #define SAMPLE_MAX 64
-
 // Program macros
 #define RAY_THREADS_PER_BLOCK_X 16
+#define ROWS_PER_ITERATION 1
+#define RAY_QUEUE_SIZE 1000000 // trace 1 million rays at a time
 inline cudaError_t err = cudaSuccess; // Global variable to ensure these macros always work.
 // Check a specific call for an error
 #define CERR(fn) \
@@ -23,16 +19,6 @@ inline cudaError_t err = cudaSuccess; // Global variable to ensure these macros 
     if (err != cudaSuccess) printf("CUDA error: %s\n", cudaGetErrorString(err))
 // Check the last error
 #define CLERR() CERR(cudaGetLastError())
-// Target pixels for debugging
- #define DEBUG_X (-1)
- #define DEBUG_Y (-1)
-// #define DEBUG_X 651
-// #define DEBUG_Y 150
-#define DEBUG ((DEBUG_X | DEBUG_Y) >= 0)
-#define DEBUG_PRINT(...) if (DEBUG) printf(__VA_ARGS__)
-#define DEBUG_KERNEL(blocks, threads, kernel, ...) \
-    if (!DEBUG) kernel<<<blocks, threads>>>(__VA_ARGS__); \
-    else kernel<<<1, 1>>>(__VA_ARGS__)
 
 //-------------------------------------------------------------------
 

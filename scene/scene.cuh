@@ -124,7 +124,7 @@ public:
     color absorption = BLACK; // How much light is absorbed
     float ior = 1;
 
-    [[nodiscard]] __device__ color Shade(Ray const& ray) const;
+    __device__ void Shade(Ray const& ray) const;
     void SetViewportMaterial( int mtlID=0 ) const {} // used for OpenGL display
     void Load( Loader const &loader ) { /* Will do something later */ }
 };
