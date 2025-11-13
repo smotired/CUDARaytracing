@@ -185,16 +185,11 @@ struct Node {
         tm.TransformDirection(ray.dir);
     }
 
-    // Transform a ray's hit from world space to local space
-    __host__ __device__ void ToLocal(Hit& hit) const {
-        itm.TransformPosition(hit.pos);
-        tm.TransformNormal(hit.n);
-    }
-
     // Transform a ray's hit from local space to world space
     __host__ __device__ void FromLocal(Hit& hit) const {
         tm.TransformPosition(hit.pos);
         itm.TransformNormal(hit.n);
+        hit.node = this;
     }
 
     // Load the node into the scene
