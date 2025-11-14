@@ -6,7 +6,7 @@
 
 int main () {
     Renderer renderer;
-    renderer.LoadScene("scenes/proj5/box.xml");
+    renderer.LoadScene("scenes/proj5/glasspot.xml");
     ShowViewport(&renderer, false);
 
     return 0;

@@ -1,0 +1,424 @@
+<xml>
+	<scene>
+		<!-- Objects -->
+		<object name="box">
+			<translate x="0" y="0" z="12"/>
+			<object type="plane" name="WallBottom" material="wall">
+				<scale x="15" y="20" />
+				<translate z="-12"/>
+			</object>
+			<object type="plane" name="WallTop" material="wall">
+				<scale x="15" y="20" />
+				<rotate angle="180" x="1"/>
+				<translate z="12"/>
+			</object>
+			<object type="plane" name="WallBack" material="wall">
+				<scale x="15" y="12" />
+				<rotate angle="90" x="1"/>
+				<translate y="20"/>
+			</object>
+
+			<object type="plane" name="WallFront" material="wall">
+				<scale x="15" y="12" />
+				<rotate angle="-90" x="1"/>
+				<translate y="-20"/>
+			</object>
+
+			<object type="plane" name="WallLeft" material="wallRed">
+				<scale x="12" y="20" />
+				<rotate angle="90" y="1"/>
+				<translate x="-15"/>
+			</object>
+			<object type="plane" name="WallRight" material="wallGreen">
+				<scale x="12" y="20" />
+				<rotate angle="-90" y="1"/>
+				<translate x="15"/>
+			</object>
+		</object>
+
+		<object name="focus">
+			<rotate angle="-30" z="1" />
+			
+			<object type="obj" name="models/teapot-hollow.obj" material="glass">
+				<scale value="0.9"/>
+				<translate x="0" y="0" z="0"/>
+			</object>
+
+			<object name="marbles">
+				<scale value="1.168"/>
+				<object type="sphere" name="marble0" material="marble1">
+					<translate x="2.53" y="-1.20" z="7.41" />
+					<scale value="1.17" />
+				</object>
+				<object type="sphere" name="marble1" material="marble1">
+					<translate x="4.74" y="-1.05" z="6.52" />
+					<scale value="1.17" />
+				</object>
+				<object type="sphere" name="marble2" material="marble3">
+					<translate x="0.17" y="-0.95" z="8.00" />
+					<scale value="1.17" />
+				</object>
+				<object type="sphere" name="marble3" material="marble1">
+					<translate x="-0.94" y="1.14" z="7.69" />
+					<scale value="1.17" />
+				</object>
+				<object type="sphere" name="marble4" material="marble3">
+					<translate x="1.55" y="0.97" z="7.59" />
+					<scale value="1.17" />
+				</object>
+				<object type="sphere" name="marble5" material="marble2">
+					<translate x="-0.35" y="3.44" z="7.42" />
+					<scale value="1.17" />
+				</object>
+				<object type="sphere" name="marble6" material="marble1">
+					<translate x="0.81" y="-1.78" z="5.86" />
+					<scale value="1.17" />
+				</object>
+				<object type="sphere" name="marble7" material="marble3">
+					<translate x="3.59" y="-3.15" z="6.53" />
+					<scale value="1.17" />
+				</object>
+				<object type="sphere" name="marble8" material="marble1">
+					<translate x="-4.67" y="2.20" z="5.76" />
+					<scale value="1.17" />
+				</object>
+				<object type="sphere" name="marble9" material="marble2">
+					<translate x="2.02" y="3.30" z="7.42" />
+					<scale value="1.17" />
+				</object>
+				<object type="sphere" name="marble10" material="marble3">
+					<translate x="1.33" y="-3.37" z="7.56" />
+					<scale value="1.17" />
+				</object>
+				<object type="sphere" name="marble11" material="marble2">
+					<translate x="-2.56" y="4.13" z="6.84" />
+					<scale value="1.17" />
+				</object>
+				<object type="sphere" name="marble12" material="marble1">
+					<translate x="-2.45" y="-0.70" z="7.60" />
+					<scale value="1.17" />
+				</object>
+				<object type="sphere" name="marble13" material="marble3">
+					<translate x="-4.73" y="-0.27" z="7.01" />
+					<scale value="1.17" />
+				</object>
+				<object type="sphere" name="marble14" material="marble2">
+					<translate x="5.02" y="-2.59" z="4.72" />
+					<scale value="1.17" />
+				</object>
+				<object type="sphere" name="marble15" material="marble3">
+					<translate x="-3.80" y="-2.44" z="6.68" />
+					<scale value="1.17" />
+				</object>
+				<object type="sphere" name="marble16" material="marble3">
+					<translate x="0.19" y="0.52" z="5.68" />
+					<scale value="1.17" />
+				</object>
+				<object type="sphere" name="marble17" material="marble2">
+					<translate x="-0.24" y="-5.01" z="6.50" />
+					<scale value="1.17" />
+				</object>
+				<object type="sphere" name="marble18" material="marble2">
+					<translate x="3.68" y="-4.47" z="4.13" />
+					<scale value="1.17" />
+				</object>
+				<object type="sphere" name="marble19" material="marble2">
+					<translate x="-1.01" y="-2.93" z="7.37" />
+					<scale value="1.17" />
+				</object>
+				<object type="sphere" name="marble20" material="marble3">
+					<translate x="-1.83" y="1.78" z="5.57" />
+					<scale value="1.17" />
+				</object>
+				<object type="sphere" name="marble21" material="marble3">
+					<translate x="-1.53" y="-1.48" z="5.54" />
+					<scale value="1.17" />
+				</object>
+				<object type="sphere" name="marble22" material="marble2">
+					<translate x="-5.14" y="-2.33" z="4.71" />
+					<scale value="1.17" />
+				</object>
+				<object type="sphere" name="marble23" material="marble3">
+					<translate x="3.81" y="1.45" z="6.99" />
+					<scale value="1.17" />
+				</object>
+				<object type="sphere" name="marble24" material="marble2">
+					<translate x="1.91" y="4.94" z="5.69" />
+					<scale value="1.17" />
+				</object>
+				<object type="sphere" name="marble25" material="marble3">
+					<translate x="5.42" y="0.90" z="5.32" />
+					<scale value="1.17" />
+				</object>
+				<object type="sphere" name="marble26" material="marble2">
+					<translate x="-3.47" y="1.31" z="3.90" />
+					<scale value="1.17" />
+				</object>
+				<object type="sphere" name="marble27" material="marble1">
+					<translate x="2.08" y="-4.87" z="5.85" />
+					<scale value="1.17" />
+				</object>
+				<object type="sphere" name="marble28" material="marble3">
+					<translate x="3.19" y="0.41" z="4.63" />
+					<scale value="1.17" />
+				</object>
+				<object type="sphere" name="marble29" material="marble1">
+					<translate x="-0.47" y="5.16" z="5.77" />
+					<scale value="1.17" />
+				</object>
+				<object type="sphere" name="marble30" material="marble2">
+					<translate x="-5.61" y="0.21" z="4.85" />
+					<scale value="1.17" />
+				</object>
+				<object type="sphere" name="marble31" material="marble3">
+					<translate x="-2.54" y="-4.43" z="6.31" />
+					<scale value="1.17" />
+				</object>
+				<object type="sphere" name="marble32" material="marble3">
+					<translate x="3.85" y="3.58" z="5.92" />
+					<scale value="1.17" />
+				</object>
+				<object type="sphere" name="marble33" material="marble3">
+					<translate x="-1.35" y="5.67" z="3.61" />
+					<scale value="1.17" />
+				</object>
+				<object type="sphere" name="marble34" material="marble1">
+					<translate x="0.81" y="2.84" z="5.42" />
+					<scale value="1.17" />
+				</object>
+				<object type="sphere" name="marble35" material="marble3">
+					<translate x="0.64" y="-2.12" z="3.50" />
+					<scale value="1.17" />
+				</object>
+				<object type="sphere" name="marble36" material="marble1">
+					<translate x="3.03" y="-1.78" z="3.70" />
+					<scale value="1.17" />
+				</object>
+				<object type="sphere" name="marble37" material="marble2">
+					<translate x="-1.27" y="0.16" z="3.83" />
+					<scale value="1.17" />
+				</object>
+				<object type="sphere" name="marble38" material="marble1">
+					<translate x="-2.57" y="3.77" z="4.49" />
+					<scale value="1.17" />
+				</object>
+				<object type="sphere" name="marble39" material="marble1">
+					<translate x="5.06" y="2.85" z="4.00" />
+					<scale value="1.17" />
+				</object>
+				<object type="sphere" name="marble40" material="marble1">
+					<translate x="1.04" y="5.76" z="3.63" />
+					<scale value="1.17" />
+				</object>
+				<object type="sphere" name="marble41" material="marble1">
+					<translate x="1.92" y="-5.53" z="2.93" />
+					<scale value="1.17" />
+				</object>
+				<object type="sphere" name="marble42" material="marble3">
+					<translate x="-1.77" y="-5.47" z="4.31" />
+					<scale value="1.17" />
+				</object>
+				<object type="sphere" name="marble43" material="marble1">
+					<translate x="0.36" y="-4.35" z="4.28" />
+					<scale value="1.17" />
+				</object>
+				<object type="sphere" name="marble44" material="marble3">
+					<translate x="5.81" y="-0.66" z="3.56" />
+					<scale value="1.17" />
+				</object>
+				<object type="sphere" name="marble45" material="marble3">
+					<translate x="-0.39" y="-5.55" z="2.37" />
+					<scale value="1.17" />
+				</object>
+				<object type="sphere" name="marble46" material="marble3">
+					<translate x="1.06" y="0.50" z="3.46" />
+					<scale value="1.17" />
+				</object>
+				<object type="sphere" name="marble47" material="marble1">
+					<translate x="-1.78" y="-3.12" z="3.82" />
+					<scale value="1.17" />
+				</object>
+				<object type="sphere" name="marble48" material="marble1">
+					<translate x="-0.55" y="-3.25" z="1.78" />
+					<scale value="1.17" />
+				</object>
+				<object type="sphere" name="marble49" material="marble2">
+					<translate x="-4.78" y="3.38" z="3.69" />
+					<scale value="1.17" />
+				</object>
+				<object type="sphere" name="marble50" material="marble1">
+					<translate x="1.89" y="-3.44" z="1.78" />
+					<scale value="1.17" />
+				</object>
+				<object type="sphere" name="marble51" material="marble2">
+					<translate x="4.52" y="-3.17" z="2.32" />
+					<scale value="1.17" />
+				</object>
+				<object type="sphere" name="marble52" material="marble3">
+					<translate x="-3.32" y="-1.07" z="3.84" />
+					<scale value="1.17" />
+				</object>
+				<object type="sphere" name="marble53" material="marble1">
+					<translate x="-5.66" y="1.36" z="2.76" />
+					<scale value="1.17" />
+				</object>
+				<object type="sphere" name="marble54" material="marble1">
+					<translate x="-5.73" y="-1.02" z="2.81" />
+					<scale value="1.17" />
+				</object>
+				<object type="sphere" name="marble55" material="marble1">
+					<translate x="1.85" y="-1.00" z="1.78" />
+					<scale value="1.17" />
+				</object>
+				<object type="sphere" name="marble56" material="marble3">
+					<translate x="3.25" y="4.86" z="3.72" />
+					<scale value="1.17" />
+				</object>
+				<object type="sphere" name="marble57" material="marble1">
+					<translate x="-3.84" y="0.00" z="1.78" />
+					<scale value="1.17" />
+				</object>
+				<object type="sphere" name="marble58" material="marble2">
+					<translate x="5.26" y="1.26" z="2.24" />
+					<scale value="1.17" />
+				</object>
+				<object type="sphere" name="marble59" material="marble1">
+					<translate x="2.41" y="2.46" z="3.69" />
+					<scale value="1.17" />
+				</object>
+				<object type="sphere" name="marble60" material="marble3">
+					<translate x="-2.60" y="-2.03" z="1.78" />
+					<scale value="1.17" />
+				</object>
+				<object type="sphere" name="marble61" material="marble2">
+					<translate x="0.77" y="2.16" z="1.78" />
+					<scale value="1.17" />
+				</object>
+				<object type="sphere" name="marble62" material="marble3">
+					<translate x="-0.71" y="2.58" z="3.60" />
+					<scale value="1.17" />
+				</object>
+				<object type="sphere" name="marble63" material="marble2">
+					<translate x="-4.65" y="-3.10" z="2.37" />
+					<scale value="1.17" />
+				</object>
+				<object type="sphere" name="marble64" material="marble2">
+					<translate x="3.85" y="3.32" z="2.01" />
+					<scale value="1.17" />
+				</object>
+				<object type="sphere" name="marble65" material="marble1">
+					<translate x="1.72" y="4.36" z="1.82" />
+					<scale value="1.17" />
+				</object>
+				<object type="sphere" name="marble66" material="marble2">
+					<translate x="-3.84" y="-4.29" z="4.27" />
+					<scale value="1.17" />
+				</object>
+				<object type="sphere" name="marble67" material="marble3">
+					<translate x="-1.60" y="1.32" z="1.78" />
+					<scale value="1.17" />
+				</object>
+				<object type="sphere" name="marble68" material="marble2">
+					<translate x="4.23" y="-0.87" z="1.78" />
+					<scale value="1.17" />
+				</object>
+				<object type="sphere" name="marble69" material="marble3">
+					<translate x="-3.01" y="4.59" z="2.29" />
+					<scale value="1.17" />
+				</object>
+				<object type="sphere" name="marble70" material="marble3">
+					<translate x="-3.74" y="2.39" z="1.79" />
+					<scale value="1.17" />
+				</object>
+				<object type="sphere" name="marble71" material="marble1">
+					<translate x="2.92" y="1.13" z="1.78" />
+					<scale value="1.17" />
+				</object>
+				<object type="sphere" name="marble72" material="marble2">
+					<translate x="-0.70" y="4.28" z="1.78" />
+					<scale value="1.17" />
+				</object>
+				<object type="sphere" name="marble73" material="marble1">
+					<translate x="-2.70" y="-4.43" z="2.05" />
+					<scale value="1.17" />
+				</object>
+				<object type="sphere" name="marble74" material="marble3">
+					<translate x="-0.54" y="-0.82" z="1.78" />
+					<scale value="1.17" />
+				</object>
+			</object>
+		</object>
+
+		<!-- Materials -->
+		<material type="blinn" name="wall">
+			<diffuse  r="1" g="1" b="1"/>
+			<specular value="0"/>
+			<reflection value="0.4"/>
+		</material>
+		<material type="blinn" name="floor">
+			<diffuse  r="1" g="1" b="1"/>
+			<specular value="0"/>
+			<reflection value="0.4"/>
+		</material>
+		<material type="blinn" name="wallRed">
+			<diffuse  r="1.0" g="0.5" b="0.5"/>
+			<specular value="0"/>
+			<reflection r="0.4" g="0.2" b="0.2"/>
+		</material>
+		<material type="blinn" name="wallGreen">
+			<diffuse r="0.4" g="0.8" b="0.4"/>
+			<specular value="0"/>
+			<reflection r="0.2" g="0.4" b="0.2"/>
+		</material>
+
+		<material type="blinn" name="marble1">
+			<diffuse  r="0.2" g="0.2" b="0.2"/>
+			<specular r="1.0" g="1.0" b="1.0" value="0.7"/>
+			<glossiness value="20"/>
+			<refraction value="0.4" index="1.52"/>
+			<absorption r="0.001" g="0.1" b="0.1"/>
+		</material>
+		<material type="blinn" name="marble2">
+			<diffuse  r="0.2" g="0.2" b="0.2"/>
+			<specular r="1.0" g="1.0" b="1.0" value="0.7"/>
+			<glossiness value="20"/>
+			<refraction value="0.4" index="1.52"/>
+			<absorption r="0.1" g="0.001" b="0.1"/>
+		</material>
+		<material type="blinn" name="marble3">
+			<diffuse  r="0.2" g="0.2" b="0.2"/>
+			<specular r="1.0" g="1.0" b="1.0" value="0.7"/>
+			<glossiness value="20"/>
+			<refraction value="0.4" index="1.52"/>
+			<absorption r="0.1" g="0.1" b="0.001"/>
+		</material>
+
+		<material type="blinn" name="glass">
+			<diffuse  r="0.02" g="0.02" b="0.05"/>
+			<specular r="1.0" g="1.0" b="1.0" value="1.0"/>
+			<glossiness value="500"/>
+			<refraction value="1" index="1.52"/>
+			<absorption r="0.001" g="0.001" b="0.0001"/>
+		</material>
+
+		<!-- Lights -->
+		<light type="ambient" name="ambientLight">
+			<intensity value="0.1"/>
+		</light>
+		<light type="point" name="pointLight">
+			<intensity value="0.5"/>
+			<position x="0" y="0" z="22"/>
+		</light>
+	</scene>
+
+  <camera>
+    <position x="0" y="-60" z="12"/>
+    <target x="0" y="0" z="12"/>
+    <up x="0" y="0" z="1"/>
+    <fov value="30"/>
+    <width value="1280"/>
+    <height value="720"/>
+	<focaldist value="60"/>
+	<dof value="1.5"/>
+  </camera>
+</xml>

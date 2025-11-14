@@ -12,9 +12,9 @@ __global__ void DispatchRows() {
         + theScene.render.pixelSize * (pX * theScene.render.cX - pY * theScene.render.cY);
 
     // If the start pixel is already out of bounds, we can just quit. Only happens here on very slow images.
-    bool finished = false;
+    bool outOfBounds = false;
     if (pX >= theScene.render.width || pY >= theScene.render.height)
-        finished = true; // We can't just return because of control flow requirements with __syncthreads().
+        outOfBounds = true; // We can't just return because of control flow requirements with __syncthreads().
 
     // Find out just how many pixels we are responsible for
     const size_t colCount = (theScene.render.width + RAY_ITERSIZE - 1) / RAY_ITERSIZE;
@@ -25,14 +25,14 @@ __global__ void DispatchRows() {
         for (int col = 0; col < colCount; col++) {
             // If this pixel is out of bounds, we're done.
             if ((pX + RAY_ITERSIZE * col) >= theScene.render.width || (pY + RAY_ITERSIZE * row) >= theScene.render.height)
-                finished = true;
+                outOfBounds = true;
 
             // Calculate index and coordinates of the pixel by adding BLOCKDIM * BLOCKCOUNT rows
             const unsigned int pI = (row * RAY_ITERSIZE * theScene.render.width) + (col * RAY_ITERSIZE) + fpI;
             const float3 pixel = firstPixel +theScene.render.pixelSize * RAY_ITERSIZE * (col * theScene.render.cX - row * theScene.render.cY);
 
             // Enqueue the primary ray and set up z buffer
-            if (!finished) {
+            if (!outOfBounds) {
                 rayQueue.Enqueue(blockIdx, Ray(theScene.camera.position, pixel - theScene.camera.position, pI));
                 theScene.render.zBuffer[pI] = BIGFLOAT;
             }
@@ -56,7 +56,7 @@ __global__ void DispatchRows() {
                 __syncthreads();
 
                 // If we aren't offscreen, dequeue rays until the queue is exhausted
-                while (!finished) {
+                while (true) { // no OOB check -- threads can help dequeue
                     Ray* ray = rayQueue.Dequeue(blockIdx);
                     if (ray == nullptr) break;
                     TraceRay(blockIdx, *ray); // Will enqueue rays as needed
@@ -66,7 +66,7 @@ __global__ void DispatchRows() {
             // Move on to the next iteration
         }
         // At the end of a row, we might not be done anymore.
-        finished = false;
+        outOfBounds = false;
     }
 }
 
@@ -77,6 +77,9 @@ __device__ void TraceRay(const uint3 blockIdx, Ray &ray, int hitSide) {
     // Initialize a hit
     Hit hit;
     hit.Init();
+
+    // Primary rays should only check front hits
+    if (ray.IsPrimary() && hitSide & HIT_FRONT) hitSide = HIT_FRONT;
 
     // Loop through the object list
     bool hitAnything = false;

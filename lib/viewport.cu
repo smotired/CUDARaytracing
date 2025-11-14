@@ -296,7 +296,6 @@ void DrawImage( void const *data, GLenum type, GLenum format )
 }
 
 //-------------------------------------------------------------------------------
-
 /**
 void DrawProgressBar( float done, int height )
 {
@@ -318,18 +317,16 @@ void DrawProgressBar( float done, int height )
 	glMatrixMode( GL_MODELVIEW );
 }
 **/
-
 //-------------------------------------------------------------------------------
-
-/** // Maybe convert to like a side scrolling bar but it should really not matter
+/**
 void DrawRenderProgressBar()
 {
-	RenderImage &renderImage = theRenderer->GetRenderImage();
-	int rp = renderImage.GetNumRenderedPixels();
-	int np = renderImage.GetWidth() * renderImage.GetHeight();
+	const RenderedImage &image = theRenderer->GetImage();
+	int rp = theScene.render.pixelsRendered;
+	int np = image.width * image.height;
 	if ( rp >= np ) return;
 	float done = (float) rp / (float) np;
-	DrawProgressBar( done, renderImage.GetHeight() );
+	DrawProgressBar( done, image.height );
 }
 **/
 
@@ -364,7 +361,7 @@ void GlutIdle()
 
 	// static int lastRenderedPixels = 0;
 	if ( mode == MODE_RENDERING ) {
-		// int nrp = renderImage.GetNumRenderedPixels();
+		// int nrp = theScene.render.pixelsRendered;
 		// if ( lastRenderedPixels != nrp ) {
 			// lastRenderedPixels = nrp;
 			if ( !theRenderer->IsRendering() ) {
