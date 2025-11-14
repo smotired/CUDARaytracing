@@ -186,7 +186,7 @@ struct Node {
     }
 
     // Transform a ray's hit from local space to world space
-    __host__ __device__ void FromLocal(Hit& hit) const {
+    __host__ __device__ void FromLocal(Hit& hit) {
         tm.TransformPosition(hit.pos);
         itm.TransformNormal(hit.n);
         hit.node = this;

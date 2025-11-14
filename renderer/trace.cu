@@ -87,7 +87,7 @@ __device__ void TraceRay(const uint3 blockIdx, Ray &ray, int hitSide) {
             node->ToLocal(ray);
 
             // Check for intersection and transform hit
-            if (OBJ_INTERSECT(*node->object, ray, hit, hitSide)) {
+            if (OBJ_INTERSECT(node->object, ray, hit, hitSide)) {
                 hitAnything = true;
                 node->FromLocal(hit);
             }
@@ -115,7 +115,7 @@ __device__ bool TraceShadowRay(ShadowRay& ray, const float3 n, const float tMax,
             // Trace a ray
             node->ToLocal(ray);
 
-            if (OBJ_INTSHADOW(*node->object, ray, tMax, hitSide))
+            if (OBJ_INTSHADOW(node->object, ray, tMax, hitSide))
                 return true;
 
             node->FromLocal(ray);

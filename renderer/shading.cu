@@ -43,7 +43,7 @@ __device__ void Material::Shade(const uint3 blockIdx, Ray const& ray, Hit const&
     }
 
     // Absorption -- On a front hit, use the ray's absorption from the previous medium. On a back hit, use the absorpt ion from the material we hit.
-    const float distance = length(ray.hit.pos - ray.pos);
+    const float distance = length(hit.pos - ray.pos);
     const color relevantAbsorption = hit.front ? ray.absorption : absorption;
     // This isn't perfect and only works if all objects are enclosed entirely
 

@@ -38,8 +38,8 @@ public:
 using ObjectPtr = cuda::std::variant<Sphere*,Plane*>;
 
 #define HAS_OBJ(objptr) cuda::std::visit([](const auto& ptr){ return ptr != nullptr; }, objptr)
-#define OBJ_INTERSECT(obj, ray, hit, hitSide) cuda::std::visit([&ray, &hit, hitSide](const auto& object){ return object.IntersectRay(ray, hit, hitSide); }, obj);
-#define OBJ_INTSHADOW(obj, ray, tMax, hitSide) cuda::std::visit([&ray, tMax, hitSide](const auto& object){ return object.IntersectShadowRay(ray, tMax, hitSide); }, obj);
-#define OBJ_BOUNDBOX(obj) cuda::std::visit([](const auto& object){ return object.GetBoundBox(); }, obj);
-#define OBJ_VIEWPORT(obj, mtlptr) cuda::std::visit([mtlptr](const auto& object){ object.ViewportDisplay(mtlptr); }, obj);
-#define OBJ_LOAD(obj, loader) cuda::std::visit([&loader](auto& object){ object.Load(loader); }, obj);
+#define OBJ_INTERSECT(objptr, ray, hit, hitSide) cuda::std::visit([&ray, &hit, hitSide](const auto& object){ return object->IntersectRay(ray, hit, hitSide); }, objptr)
+#define OBJ_INTSHADOW(objptr, ray, tMax, hitSide) cuda::std::visit([&ray, tMax, hitSide](const auto& object){ return object->IntersectShadowRay(ray, tMax, hitSide); }, objptr)
+#define OBJ_BOUNDBOX(objptr) cuda::std::visit([](const auto& object){ return object->GetBoundBox(); }, objptr)
+#define OBJ_VIEWPORT(objptr, mtlptr) cuda::std::visit([mtlptr](const auto& object){ object->ViewportDisplay(mtlptr); }, objptr)
+#define OBJ_LOAD(objptr, loader) cuda::std::visit([&loader](auto& object){ object->Load(loader); }, objptr)

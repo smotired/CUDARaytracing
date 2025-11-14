@@ -100,7 +100,7 @@ __device__ bool Plane::IntersectRay(Ray const& ray, Hit& hit, const int hitSide 
 	const float t = -ray.pos.z / ray.dir.z; // kinda crazy how simple this gets in local space
 
 	// Check that it's visible and the closest hit so far
-	if (t < 0 || t >= ray.hit.z)
+	if (t < 0 || t >= hit.z)
 		return false;
 
 	// Check that it intersects the correct side
