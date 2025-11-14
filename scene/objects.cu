@@ -143,3 +143,121 @@ __device__ bool Plane::IntersectShadowRay(const ShadowRay &ray, const float tMax
 	if (std::abs(hitPos.x) > 1 || std::abs(hitPos.y) > 1)
 		return false;
 }
+
+__device__ bool MeshObject::IntersectRay(Ray const &ray, Hit &hit, const int hitSide) const {
+	// Assume that if HIT_NONE is provided we should always return false.
+	if (hitSide == HIT_NONE) return false;
+
+	// Just check every single triangle
+	bool hitAnyTriangle = false;
+	for (int i = 0; i < nf; i++)
+		if (IntersectTriangle(ray, hit, hitSide, i))
+			hitAnyTriangle = true;
+	return hitAnyTriangle;
+}
+
+__device__ bool MeshObject::IntersectShadowRay(ShadowRay const &ray, const float tMax, const int hitSide) const {
+	// Assume that if HIT_NONE is provided we should always return false.
+	if (hitSide == HIT_NONE) return false;
+
+	// Just check every single triangle
+	for (int i = 0; i < nf; i++)
+		if (IntersectShadowTriangle(ray, tMax, hitSide, i))
+			return true;
+	return false;
+}
+
+__device__ bool MeshObject::IntersectTriangle(Ray const& ray, Hit& hit, const int hitSide, const unsigned int faceID) const {
+	// Uses the Moller-Trumbore method.
+	// Get basic info about the triangle.
+	const uint3 face = f[faceID];
+	const float3 p0 = v[face.x];
+	const float3 p1 = v[face.y];
+	const float3 p2 = v[face.z];
+
+	// Get edges and ensure ray intersects the face's plane
+	const float3 edge1 = p1 - p0;
+	const float3 edge2 = p2 - p0;
+	const float3 rayXEdge2 = cross(ray.dir, edge2);
+	const float determinant = edge1 % rayXEdge2;
+
+	if (determinant > -EPS && determinant < EPS) return false;
+
+	// Get first barycentric coordinate
+	const float inverseDeterminant = 1 / determinant;
+	const float3 offset = ray.pos - p0;
+	const float b1 = inverseDeterminant * (offset % rayXEdge2);
+
+	if (b1 <= EPS || b1 >= 1 + EPS) return false;
+
+	// Get the second barycentric coordinate
+	const float3 offsetXEdge1 = cross(offset, edge1);
+	const float b2 = inverseDeterminant * (ray.dir % offsetXEdge1);
+
+	if (b2 <= -EPS || (b1 + b2) >= 1 + EPS) return false;
+
+	// At this point, the ray definitely intersects the triangle.
+	// Find t, return if it's invalid.
+	const float t = inverseDeterminant * (edge2 % offsetXEdge1);
+	if (t <= EPS || t >= hit.z + EPS) return false;
+
+	// Check that we're hitting the correct side of the triangle
+	const float ndot = cross(edge1, edge2) % ray.dir;
+	if (!(ndot < EPS && (hitSide & HIT_FRONT)) && !(ndot > -EPS && (hitSide & HIT_BACK))) return false;
+
+	// Get remaining barycentric coordinate and interpolate normals.
+	const float b0 = 1 - b2 - b1;
+	const float3 barycentric(b0, b1, b2);
+	const float3 gn = asNorm(cross(edge1, edge2));
+
+	const float3 n = !HasNormals() ? gn : vn[fn[faceID].x] * barycentric.x + vn[fn[faceID].y] * barycentric.y + vn[fn[faceID].z] * barycentric.z;
+
+	// Set up hit
+	hit.z = t;
+	hit.n = n;
+	hit.pos = ray.pos + t * ray.dir;
+	hit.front = ndot < 0;
+	return true;
+}
+
+__device__ bool MeshObject::IntersectShadowTriangle(ShadowRay const& ray, const float tMax, const int hitSide, const unsigned int faceID) const {
+	// Uses the Moller-Trumbore method.
+	// Get basic info about the triangle.
+	const uint3 face = f[faceID];
+	const float3 p0 = v[face.x];
+	const float3 p1 = v[face.y];
+	const float3 p2 = v[face.z];
+
+	// Get edges and ensure ray intersects the face's plane
+	const float3 edge1 = p1 - p0;
+	const float3 edge2 = p2 - p0;
+	const float3 rayXEdge2 = cross(ray.dir, edge2);
+	const float determinant = edge1 % rayXEdge2;
+
+	if (determinant > -EPS && determinant < EPS) return false;
+
+	// Get first barycentric coordinate
+	const float inverseDeterminant = 1 / determinant;
+	const float3 offset = ray.pos - p0;
+	const float b1 = inverseDeterminant * (offset % rayXEdge2);
+
+	if (b1 <= EPS || b1 >= 1 + EPS) return false;
+
+	// Get the second barycentric coordinate
+	const float3 offsetXEdge1 = cross(offset, edge1);
+	const float b2 = inverseDeterminant * (ray.dir % offsetXEdge1);
+
+	if (b2 <= -EPS || (b1 + b2) >= 1 + EPS) return false;
+
+	// At this point, the ray definitely intersects the triangle.
+	// Find t, return if it's invalid.
+	const float t = inverseDeterminant * (edge2 % offsetXEdge1);
+	if (t <= EPS || t >= tMax + EPS) return false;
+
+	// Check that we're hitting the correct side of the triangle
+	const float ndot = cross(edge1, edge2) % ray.dir;
+	if (!(ndot < EPS && (hitSide & HIT_FRONT)) && !(ndot > -EPS && (hitSide & HIT_BACK))) return false;
+
+	// This should cast a shadow
+	return true;
+}
