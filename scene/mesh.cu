@@ -95,7 +95,7 @@ bool Mesh::LoadFromFileObj(char const *filename) {
         // Faces
         else if (buffer.IsCommand("f")) {
             int facevert = -1;
-            bool inspace = false;
+            bool inspace = true;
             bool negative = false;
             int type = 0;
             unsigned int index = 0;
