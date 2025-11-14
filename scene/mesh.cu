@@ -13,8 +13,8 @@ void Mesh::ComputeBoundingBox() {
 // Load a mesh from an OBJ file.
 bool Mesh::LoadFromFileObj(char const *filename) {
     // Open the file
-    FILE *f = fopen(filename, "rb");
-    if (!f) return false;
+    FILE *fp = fopen(filename, "rb");
+    if (!fp) return false;
     Clear();
 
     // Buffer we write to as we load
@@ -75,7 +75,7 @@ bool Mesh::LoadFromFileObj(char const *filename) {
     bool hasNormals = false, hasTexCoords = false;
 
     // Read from the buffer
-    while (int rb = buffer.ReadLine(f)) {
+    while (int rb = buffer.ReadLine(fp)) {
         // Vertex types
         if (buffer.IsCommand("v")) {
             float3 vertex = buffer.ReadFloat3();
@@ -156,9 +156,9 @@ bool Mesh::LoadFromFileObj(char const *filename) {
             if (hasNormals) _fn.push_back(normFace);
         }
 
-        if (feof(f)) break;
+        if (feof(fp)) break;
     }
-    fclose(f);
+    fclose(fp);
 
     // Set up data
     if ( _f.empty() ) return true; // No faces found

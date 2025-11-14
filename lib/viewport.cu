@@ -578,6 +578,40 @@ void Plane::ViewportDisplay( Material const *mtl ) const
 	glPopMatrix();
 }
 
+void MeshObject::ViewportDisplay( Material const *mtl ) const
+{
+	unsigned int nextMtlID = 0;
+	unsigned int nextMtlSwith = nf;
+	/*
+	if ( mtl && NM() > 0 ) {
+		mtl->SetViewportMaterial(0);
+		nextMtlSwith = GetMaterialFaceCount(0);
+		nextMtlID = 1;
+	}
+	*/
+
+	glBegin(GL_TRIANGLES);
+	for ( unsigned int i=0; i<nf; i++ ) {
+		while ( i >= nextMtlSwith ) {
+			if ( nextMtlID >= 0 /*nm*/ ) nextMtlSwith = nf;
+			else {
+				glEnd();
+				nextMtlSwith += 0; // GetMaterialFaceCount(nextMtlID);
+				mtl->SetViewportMaterial(nextMtlID);
+				nextMtlID++;
+				glBegin(GL_TRIANGLES);
+			}
+		}
+		for ( int j=0; j<3; j++ ) {
+			// these reference device memory so i would have to rearrange
+			if ( HasTextureVertices() ) glTexCoord3fv( &vt[ ref(ft[i], j) ].x );
+			if ( HasNormals() ) glNormal3fv( &vn[ ref(fn[i], j) ].x );
+			glVertex3fv( &v[ ref(f[i], j) ].x );
+		}
+	}
+	glEnd();
+}
+
 void GLLight::SetViewportParam( int lightID, color const &ambient, color const &intensity, float4 const &pos ) const
 {
 	float4 namb = make_float4(ambient.x, ambient.y, ambient.z, 1.0f);

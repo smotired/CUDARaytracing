@@ -46,6 +46,15 @@ public:
     __host__ __device__ Box GetBoundBox() const { return Box(float3(-1,-1,0), float3(1,1,0)); };
     void ViewportDisplay( Material const* material ) const;
     void Load( Loader const &loader ) {}
+
+    bool Load(char const* filename)
+    {
+        if (!LoadFromFileObj(filename)) return false;
+        // if (!HasNormals()) ComputeNormals();
+        ComputeBoundingBox();
+        // bvh.SetMesh(this, 4);
+        return true;
+    }
 };
 
 // -------- Object union

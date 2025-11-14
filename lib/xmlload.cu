@@ -30,6 +30,9 @@ void AssignNodes( Loader const& loader, Node* nodeList, int& next, const Matrix&
 void LoadLight( Loader const& loader, Light* lightList, int i );
 void LoadMaterial( Loader const& loader, Material* materialList, int i, unsigned int* materialTable, size_t materialCount );
 
+std::hash<std::string> hasher;
+#define HASH(charptr) hasher(std::string(charptr))
+
 //-------------------------------------------------------------------------------
 
 // Insert into and search a hash table that maps material names to indexes in the materials list.
@@ -62,8 +65,41 @@ unsigned int GetMaterial(const unsigned int* table, const size_t entryCount, con
 	return table[i + 1];
 }
 
-std::hash<std::string> hasher;
-#define HASH(charptr) hasher(std::string(charptr))
+//-------------------------------------------------------------------------------
+
+// Similar hash table but for pointers to
+#define MAX_MESHES 512
+// This is the hash table size, which only lives on the host so it's fine. The actual mesh objects will be all over the place.
+
+void* meshTable[MAX_MESHES * 2];
+
+void InsertMesh(const unsigned long hash, const MeshObject* mesh) {
+	// Loop until we find an open spot
+	unsigned int i = 2 * (hash % MAX_MESHES);
+	const unsigned int initI = i;
+	while (meshTable[i] != nullptr) {
+		i += 2;
+		if (i >= 2 * MAX_MESHES) i = 0;
+		if (i == initI) throw std::exception(); // no room in table
+	}
+
+	// Insert
+	meshTable[i] = (void*)hash;
+	meshTable[i + 1] = (void*)mesh;
+}
+
+MeshObject* GetMesh(const unsigned long hash) {
+	// Loop until we find the spot
+	unsigned int i = 2 * (hash % MAX_MESHES);
+	const unsigned int initI = i;
+	while (meshTable[i] != (void*)hash) {
+		i += 2;
+		if (i >= 2 * MAX_MESHES) i = 0;
+		if (i == initI) return nullptr; // not present in table
+	}
+
+	return (MeshObject*)meshTable[i + 1];
+}
 
 //-------------------------------------------------------------------------------
 
@@ -182,6 +218,28 @@ void AssignNodes( Loader const &loader, Node* nodeList, int& next, const Matrix&
 	if ( type ) {
 		if ( type == "sphere" ) node->object = theSphere;
 		else if ( type == "plane" ) node->object = thePlane;
+		else if ( type == "obj" ) {
+			// Get the name and check if it's in the table
+			char const *name = loader.Attribute("name");
+			MeshObject* obj = GetMesh(hasher(name));
+
+			// If the mesh exists, give it to the node.
+			if (obj != nullptr)
+				node->object = obj;
+
+			// Otherwise, create a new one. Try loading it, and add it to the table if successful.
+			else {
+				cudaMallocManaged(&obj, sizeof(MeshObject));
+				obj = new MeshObject();
+				if (!obj->Load(name)) {
+					printf("ERROR: Cannot load file \"%s\"", name);
+					cudaFree(obj);
+				} else {
+					InsertMesh(hasher(name), obj);
+					node->object = obj;
+				}
+			}
+		}
 		else printf("ERROR: Unknown object type %s\n", static_cast<char const*>(type));
 	}
 

@@ -40,8 +40,8 @@ public:
             nv(0), nf(0), nvn(0), nvt(0), box() { *this = t; }
     virtual ~Mesh() { Clear(); }
 
-    [[nodiscard]] __device__ bool HasNormals() const { return nvn > 0; }
-    [[nodiscard]] __device__ bool HasTextureVertices() const { return nvt > 0; }
+    [[nodiscard]] __host__ __device__ bool HasNormals() const { return nvn > 0; }
+    [[nodiscard]] __host__ __device__ bool HasTextureVertices() const { return nvt > 0; }
 
     [[nodiscard]] Box const& GetBoundingBox() const { return box; }
     void ComputeBoundingBox();                 // Compute the bounding box from vertices

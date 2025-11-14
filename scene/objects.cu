@@ -142,6 +142,8 @@ __device__ bool Plane::IntersectShadowRay(const ShadowRay &ray, const float tMax
 	const float3 hitPos = ray.pos + t * ray.dir;
 	if (std::abs(hitPos.x) > 1 || std::abs(hitPos.y) > 1)
 		return false;
+
+	return true;
 }
 
 __device__ bool MeshObject::IntersectRay(Ray const &ray, Hit &hit, const int hitSide) const {
