@@ -590,14 +590,15 @@ void MeshObject::ViewportDisplay( Material const *mtl ) const
 	glBegin(GL_TRIANGLES);
 	for ( unsigned int i=0; i<nf; i++ ) {
 		while ( i >= nextMtlSwith ) {
-			if ( nextMtlID >= 0 /*nm*/ ) nextMtlSwith = nf;
-			else {
-				glEnd();
-				nextMtlSwith += 0; // GetMaterialFaceCount(nextMtlID);
-				mtl->SetViewportMaterial(nextMtlID);
-				nextMtlID++;
-				glBegin(GL_TRIANGLES);
-			}
+			// if ( nextMtlID >= 0 /*nm*/ )
+				nextMtlSwith = nf;
+			// else {
+			//  	glEnd();
+			//  	nextMtlSwith += 0; // GetMaterialFaceCount(nextMtlID);
+			//  	mtl->SetViewportMaterial(nextMtlID);
+			//  	nextMtlID++;
+			// 	    glBegin(GL_TRIANGLES);
+			// }
 		}
 		for ( int j=0; j<3; j++ ) {
 			// these reference device memory so i would have to rearrange

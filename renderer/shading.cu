@@ -5,7 +5,7 @@
 #include "vector.cuh"
 #include "../scene/scene.cuh"
 
-__device__ void Material::Shade(const uint3 blockIdx, Ray const& ray, Hit const& hit) const {
+__device__ void Material::Shade(Ray const& ray, Hit const& hit) const {
     float3 v = asNorm(-ray.dir); // View direction
 
     // Calculate color contribution from direct lighting
@@ -53,7 +53,7 @@ __device__ void Material::Shade(const uint3 blockIdx, Ray const& ray, Hit const&
     atomicAdd(&theScene.render.results[ray.pixel].y, contribution.y);
     atomicAdd(&theScene.render.results[ray.pixel].z, contribution.z);
 
-    // Trace indirect light
+    // Everything after this requires a bounce
     if (!ray.CanBounce()) return;
 
     // Reflections -- must trace if either reflection or refraction is enabled, because of fresnel.
@@ -86,15 +86,15 @@ __device__ void Material::Shade(const uint3 blockIdx, Ray const& ray, Hit const&
 
             // Enqueue a refraction ray with absorption
             const color refractionContribution = refraction * (1 - f_theta);
-            Ray refractionRay(hit.pos, t, ray.pixel, ray.bounce + 1, ray.contribution * refractionContribution, absorption);
-            rayQueue.Enqueue(blockIdx, refractionRay);
+            Ray refractionRay(hit.pos, t, ray.pixel, ray.bounce - 1, ray.contribution * refractionContribution, absorption);
+            TraceRay(refractionRay);
         }
     }
 
     // Trace the reflection ray
     if (reflectionContribution != BLACK) {
         const float3 r = reflect(v, hit.n);
-        Ray reflectionRay(hit.pos, r, ray.pixel, ray.bounce + 1, ray.contribution * reflectionContribution);
-        rayQueue.Enqueue(blockIdx, reflectionRay);
+        Ray reflectionRay(hit.pos, r, ray.pixel, ray.bounce - 1, ray.contribution * reflectionContribution);
+        TraceRay(reflectionRay);
     }
 }
