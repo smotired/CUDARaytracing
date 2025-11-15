@@ -1,5 +1,7 @@
 /// Raycasting info
 #pragma once
+#include <float.h>
+
 #include "settings.cuh"
 #include "float3.cuh"
 #include "color.cuh"
@@ -43,6 +45,7 @@ struct Hit {
     }
 };
 
+// TODO: Rename Ray to SampleRay, ShadowRay to Ray, make IntersectRay only take in a Ray
 struct Ray {
     // Origin of the ray
     float3 pos;
@@ -110,6 +113,12 @@ struct Box {
         if (pmax.z < pos.z) pmax.z = pos.z;
     }
 
+    // Expand the box to include another box
+    void operator+=(const Box box) {
+        *this += box.pmin;
+        *this += box.pmax;
+    }
+
     // Use the slab method to determine if the ray intersects with the box
     __host__ __device__ bool IntersectRay(const Ray& ray, float& dist, const float t_max = BIGFLOAT) const {
 	    const float3 inv = float3(1.0f / ray.dir.x, 1.0f / ray.dir.y, 1.0f / ray.dir.z);
@@ -128,10 +137,34 @@ struct Box {
         const float tExit = std::fmin(tFar.x, std::fmin(tFar.y, tFar.z));
 
         // If it actually enters, the box, return the intersection distance
-        if ((tEnter >= 0 || tExit >= 0) && tEnter <= tExit && tEnter <= t_max) {
-            dist = tEnter >= 0 ? tEnter : tExit;
+        if ((tEnter >= -FLT_EPSILON || tExit >= -FLT_EPSILON) && tEnter <= tExit && tEnter <= t_max) {
+            dist = tEnter >= -FLT_EPSILON ? tEnter : tExit;
             return true;
         }
+
+        return false;
+    }
+
+    // Use the slab method to determine if the ray intersects with the box
+    __host__ __device__ bool IntersectShadowRay(const ShadowRay& ray, const float t_max = BIGFLOAT) const {
+        const float3 inv = float3(1.0f / ray.dir.x, 1.0f / ray.dir.y, 1.0f / ray.dir.z);
+
+        const float3 tLow = (pmin - ray.pos) * inv;
+        const float3 tHigh = (pmax - ray.pos) * inv;
+
+        const float3 tClose(std::fmin(tLow.x, tHigh.x),
+                      std::fmin(tLow.y, tHigh.y),
+                      std::fmin(tLow.z, tHigh.z));
+        const float3 tFar(std::fmax(tLow.x, tHigh.x),
+                    std::fmax(tLow.y, tHigh.y),
+                    std::fmax(tLow.z, tHigh.z));
+
+        const float tEnter = std::fmax(tClose.x, std::fmax(tClose.y, tClose.z));
+        const float tExit = std::fmin(tFar.x, std::fmin(tFar.y, tFar.z));
+
+        // If it actually enters, the box, return the intersection distance
+        if ((tEnter >= -FLT_EPSILON || tExit >= -FLT_EPSILON) && tEnter <= tExit && tEnter <= t_max)
+            return true;
 
         return false;
     }

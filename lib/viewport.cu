@@ -577,7 +577,7 @@ void Plane::ViewportDisplay( Material const *mtl ) const
 
 void MeshObject::ViewportDisplay( Material const *mtl ) const
 {
-	unsigned int nextMtlID = 0;
+	// unsigned int nextMtlID = 0;
 	unsigned int nextMtlSwith = nf;
 	/*
 	if ( mtl && NM() > 0 ) {

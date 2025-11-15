@@ -197,6 +197,10 @@ void Scene::Load( Loader const &sceneLoader )
 			AssignNodes(loader, nodes, next, ident, materials, materialTable, materialCount);
 		}
 	}
+
+	// Go backwards and assign bounding boxes
+	for (int i = nodeCount - 1; i >= 0; i--)
+		nodes[i].CalculateBoundingBox(nodes, i);
 }
 
 size_t CountNodes( Loader const &loader ) {

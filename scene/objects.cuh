@@ -8,7 +8,7 @@
 // All objects must have the following methods:
 // __device__ bool IntersectRay(Ray const &ray, Hit& hit, int hitSide) const;
 // __device__ bool IntersectShadowRay(const ShadowRay &ray, float tMax, int hitSide) const;
-// __host__ __device__ Box GetBoundBox() const { return Box(-F3_ONE, F3_ONE); };
+// __host__ __device__ Box GetBoundBox() const;
 // void ViewportDisplay( Material const* material ) const;
 // void Load( Loader const& loader );
 
@@ -43,7 +43,7 @@ protected:
 public:
     __device__ bool IntersectRay(Ray const &ray, Hit& hit, int hitSide) const;
     __device__ bool IntersectShadowRay(const ShadowRay &ray, float tMax, int hitSide) const;
-    __host__ __device__ Box GetBoundBox() const { return Box(float3(-1,-1,0), float3(1,1,0)); };
+    __host__ __device__ Box GetBoundBox() const { return box; };
     void ViewportDisplay( Material const* material ) const;
     void Load( Loader const &loader ) {}
 

@@ -31,16 +31,21 @@ __device__ void TraceRay(Ray &ray, int hitSide) {
     bool hitAnything = false;
     for (int i = 0; i < theScene.nodeCount; i++) {
         Node* node = theScene.nodes + i;
-        if (HAS_OBJ(node->object)) {
-            // Trace a ray
-            node->ToLocal(ray);
 
-            // Check for intersection and transform hit
-            if (OBJ_INTERSECT(node->object, ray, hit, hitSide)) {
-                hitAnything = true;
-                node->FromLocal(hit);
+        if (HAS_OBJ(node->object)) {
+            // Check for intersection with its bounding box
+            float boxZ = BIGFLOAT;
+            const bool hitBox = node->boundingBox.IntersectRay(ray, boxZ);
+
+            if (hitBox && boxZ < hit.z) {
+                // Check for intersection with the actual object, and transform hit
+                node->ToLocal(ray);
+                if (OBJ_INTERSECT(node->object, ray, hit, hitSide)) {
+                    hitAnything = true;
+                    node->FromLocal(hit);
+                }
+                node->FromLocal(ray);
             }
-            node->FromLocal(ray);
         }
     }
 
@@ -58,15 +63,31 @@ __device__ bool TraceShadowRay(ShadowRay& ray, const float3 n, const float tMax,
     ray.pos += ray.dir * BIAS + n * BIAS;
 
     // Loop through the object list
+    unsigned int skip = 0;
     for (int i = 0; i < theScene.nodeCount; i++) {
         Node* node = theScene.nodes + i;
+
+        // If we missed a parent's bounding box, we can skip all descendants
+        // Unfortunately this trick actually slows it down a lot for sampling rays.
+        if (skip > 0) {
+            skip--;
+            skip += node->childCount;
+            continue;
+        }
+
         if (HAS_OBJ(node->object)) {
+            const bool hitBox = node->boundingBox.IntersectShadowRay(ray, tMax);
+
+            // If we don't collide with parent bounding box, we don't collide with any child either.
+            if (!hitBox) {
+                skip = node->childCount;
+                continue;
+            }
+
             // Trace a ray
             node->ToLocal(ray);
-
             if (OBJ_INTSHADOW(node->object, ray, tMax, hitSide))
                 return true;
-
             node->FromLocal(ray);
         }
     }

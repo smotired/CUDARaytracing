@@ -152,13 +152,7 @@ struct Node {
     Matrix itm;
 
     // Default constructor
-    Node() {
-        object = (Sphere*)nullptr;
-        material = nullptr;
-        tm = Matrix();
-        itm = Matrix();
-        boundingBox = Box();
-        childCount = 0;
+    Node() : childCount(0), object(static_cast<Sphere *>(nullptr)), material(nullptr), boundingBox(Box()), tm(Matrix()), itm(Matrix()) {
     }
 
     // Transform a ray from world space to local space
@@ -190,6 +184,68 @@ struct Node {
         tm.TransformPosition(hit.pos);
         itm.TransformNormal(hit.n);
         hit.node = this;
+    }
+
+    // Create a tight AABB in world space around the possibly-not-aligned box in object space.
+    Box FromLocal(const Box& box) const {
+        Box transformed;
+        transformed.Init();
+
+        // Calculate and transform each corner of the original box, and add it to the new box.
+        float3 x0y0z0 = box.pmin;
+        tm.TransformPosition(x0y0z0);
+        transformed += x0y0z0;
+        float3 x0y0z1 = float3(box.pmin.x, box.pmin.y, box.pmax.z);
+        tm.TransformPosition(x0y0z1);
+        transformed += x0y0z1;
+
+        float3 x0y1z0 = float3(box.pmin.x, box.pmax.y, box.pmin.z);
+        tm.TransformPosition(x0y1z0);
+        transformed += x0y1z0;
+        float3 x0y1z1 = float3(box.pmin.x, box.pmax.y, box.pmax.z);
+        tm.TransformPosition(x0y1z1);
+        transformed += x0y1z1;
+
+        float3 x1y0z0 = float3(box.pmax.x, box.pmin.y, box.pmin.z);
+        tm.TransformPosition(x1y0z0);
+        transformed += x1y0z0;
+        float3 x1y0z1 = float3(box.pmax.x, box.pmin.y, box.pmax.z);
+        tm.TransformPosition(x1y0z1);
+        transformed += x1y0z1;
+
+        float3 x1y1z0 = float3(box.pmax.x, box.pmax.y, box.pmin.z);
+        tm.TransformPosition(x1y1z0);
+        transformed += x1y1z0;
+        float3 x1y1z1 = box.pmax;
+        tm.TransformPosition(x1y1z1);
+        transformed += x1y1z1;
+
+        return transformed;
+    }
+
+    // Calculate the bounding box of this node, assuming bounding boxes of child nodes have been calculated.
+    void CalculateBoundingBox(const Node* nodeList, const unsigned int nodeID) {
+        boundingBox.Init();
+
+        // If this node has an object, add its bounding box
+        if (HAS_OBJ(object)) boundingBox += FromLocal(OBJ_BOUNDBOX(object));
+
+        // Recurse to children
+        unsigned int children = childCount;
+        unsigned int skip = 0;
+        for (unsigned int i = nodeID + 1; children > 0; i++) {
+            // If we should skip this node, also add its children as skippable
+            if (skip > 0) {
+                skip--;
+                skip += nodeList[i].childCount;
+            }
+            // Otherwise, this is a direct child, so add its bounding box and skip its children
+            else {
+                boundingBox += nodeList[i].boundingBox;
+                skip = nodeList[i].childCount;
+                children--;
+            }
+        }
     }
 
     // Load the node into the scene

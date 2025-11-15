@@ -3,7 +3,7 @@
 // Rendering macros
 
 // Small offset added to ray origins.
-#define BIAS 0.0002f
+#define BIAS 0.02f
 
 // How many times primary rays can bounce or split
 #define BOUNCES 8
