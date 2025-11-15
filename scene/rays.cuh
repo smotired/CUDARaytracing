@@ -39,12 +39,7 @@ struct Hit {
     }
 
     // Initialize with default values
-    __host__ __device__ Hit() {
-        pos = F3_ZERO;
-        z = BIGFLOAT;
-        n = F3_UP;
-        front = true;
-        node = nullptr;
+    __host__ __device__ Hit() : pos(F3_ZERO), z(BIGFLOAT), n(F3_UP), front(true), node(nullptr) {
     }
 };
 
@@ -58,8 +53,8 @@ struct Ray {
     // Pixel index (y * width + x) of the ray
     unsigned int pixel = 0;
 
-    // Current bounce index of the ray
-    unsigned int bounce = 0;
+    // Bounce number
+    unsigned int bounce;
 
     // Contribution of the ray to the final color
     color contribution = WHITE;
@@ -67,13 +62,12 @@ struct Ray {
     // Multiplier for contribution based on distance (for absorption)
     color absorption = BLACK;
 
-    __host__ __device__ Ray(const float3 pos, const float3 dir, const unsigned int pixel, const unsigned int bounce = 0, const color contribution = WHITE, const color absorption = BLACK) :
+    __device__ Ray(const float3 pos, const float3 dir, const unsigned int pixel, const unsigned int bounce = BOUNCES, const color contribution = WHITE, const color absorption = BLACK) :
         pos(pos), dir(dir), pixel(pixel), bounce(bounce), contribution(contribution), absorption(absorption) {
     }
 
-    __device__ bool IsPrimary() const { return bounce == 0; }
-
-    __device__ bool CanBounce() const { return bounce + 1 < BOUNCES; }
+    __device__ bool IsPrimary() const { return bounce == BOUNCES; }
+    __device__ bool CanBounce() const { return bounce > 0; }
 };
 
 struct ShadowRay {
