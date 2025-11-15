@@ -146,7 +146,7 @@ struct Box {
     }
 
     // Use the slab method to determine if the ray intersects with the box
-    __host__ __device__ bool IntersectShadowRay(const ShadowRay& ray, const float t_max = BIGFLOAT) const {
+    __host__ __device__ bool IntersectShadowRay(const ShadowRay& ray, float& dist, const float t_max = BIGFLOAT) const {
         const float3 inv = float3(1.0f / ray.dir.x, 1.0f / ray.dir.y, 1.0f / ray.dir.z);
 
         const float3 tLow = (pmin - ray.pos) * inv;
@@ -163,8 +163,10 @@ struct Box {
         const float tExit = std::fmin(tFar.x, std::fmin(tFar.y, tFar.z));
 
         // If it actually enters, the box, return the intersection distance
-        if ((tEnter >= -FLT_EPSILON || tExit >= -FLT_EPSILON) && tEnter <= tExit && tEnter <= t_max)
+        if ((tEnter >= -FLT_EPSILON || tExit >= -FLT_EPSILON) && tEnter <= tExit && tEnter <= t_max) {
+            dist = tEnter >= -FLT_EPSILON ? tEnter : tExit;
             return true;
+        }
 
         return false;
     }

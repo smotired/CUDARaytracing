@@ -48,4 +48,10 @@ public:
 
     // Load from a file
     bool LoadFromFileObj( char const* filename );
+
+    // Member access
+    [[nodiscard]] float3* V(const unsigned int i = 0) const { return v + i; }
+    [[nodiscard]] uint3* F(const unsigned int i = 0) const { return f + i; }
+
+    [[nodiscard]] size_t NF() const { return nf; }
 };

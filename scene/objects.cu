@@ -149,24 +149,110 @@ __device__ bool Plane::IntersectShadowRay(const ShadowRay &ray, const float tMax
 __device__ bool MeshObject::IntersectRay(Ray const &ray, Hit &hit, const int hitSide) const {
 	// Assume that if HIT_NONE is provided we should always return false.
 	if (hitSide == HIT_NONE) return false;
-
-	// Just check every single triangle
-	bool hitAnyTriangle = false;
-	for (int i = 0; i < nf; i++)
-		if (IntersectTriangle(ray, hit, hitSide, i))
-			hitAnyTriangle = true;
-	return hitAnyTriangle;
+	return Traverse(ray, hit, hitSide);
 }
 
 __device__ bool MeshObject::IntersectShadowRay(ShadowRay const &ray, const float tMax, const int hitSide) const {
 	// Assume that if HIT_NONE is provided we should always return false.
 	if (hitSide == HIT_NONE) return false;
+	return TraverseShadow(ray, tMax, hitSide);
+}
 
-	// Just check every single triangle
-	for (int i = 0; i < nf; i++)
-		if (IntersectShadowTriangle(ray, tMax, hitSide, i))
-			return true;
-	return false;
+__device__ bool MeshObject::Traverse(Ray const& ray, Hit& hit, const int hitSide) const {
+	struct StackEntry {
+		size_t node; // The node in this stack
+		float minT;  // If our existing hit is less than t, skip this stack entry
+	};
+	StackEntry stack[BVH_MAX_DEPTH];
+	size_t stackTop = 0;
+	stack[stackTop++] = StackEntry(0, 0);
+
+	// Loop until stack is empty
+	bool hitAnything = false;
+	while (stackTop > 0) {
+		const StackEntry top = stack[--stackTop]; // peek at top
+		if (hit.z < top.minT) continue;
+
+		// If this is a leaf node, just check triangles
+		if (bvh.NodeIsLeaf(top.node)) {
+			const size_t *elements = bvh.GetNodeElements(top.node);
+			const size_t triCount = bvh.GetNodeElementCount(top.node);
+			for (int i = 0; i < triCount; i++)
+				if (IntersectTriangle(ray, hit, hitSide, elements[i]))
+					hitAnything = true;
+			continue;
+		}
+
+		// Otherwise, push close and then far children.
+		const size_t leftID = bvh.GetNodeLeftChild(top.node);
+		const size_t rightID = bvh.GetNodeRightChild(top.node);
+
+		// Check for intersections
+		float tLeft = BIGFLOAT, tRight = BIGFLOAT;
+		const bool hitLeft = bvh.GetNodeBoundingBox(leftID).IntersectRay(ray, tLeft, BIGFLOAT);
+		const bool hitRight = bvh.GetNodeBoundingBox(rightID).IntersectRay(ray, tRight, BIGFLOAT);
+
+		// If we don't hit either child bounding box, the ray must be right on the edge, so just do nothing.
+		if (!hitLeft && !hitRight) continue;
+
+		// Determine which is closer
+		const size_t closeID = tLeft <= tRight ? leftID : rightID;
+		const size_t farID = tLeft <= tRight ? rightID : leftID;
+		const float tClose = fmin(tLeft, tRight);
+		const float tFar = fmax(tLeft, tRight);
+
+		// Push both entries to the stack, so that we pop close first
+		stack[stackTop++] = StackEntry(farID, tFar);
+		stack[stackTop++] = StackEntry(closeID, tClose);
+	}
+
+	return hitAnything;
+}
+
+__device__ bool MeshObject::TraverseShadow(ShadowRay const& ray, const float tMax, const int hitSide) const {
+	size_t stack[BVH_MAX_DEPTH];
+	size_t stackTop = 0;
+	stack[stackTop++] = 0;
+
+	// Loop until stack is empty
+	bool hitAnything = false;
+	while (stackTop > 0) {
+		const size_t top = stack[--stackTop]; // peek at top
+
+		// If this is a leaf node, just check triangles
+		if (bvh.NodeIsLeaf(top)) {
+			const size_t *elements = bvh.GetNodeElements(top);
+			const size_t triCount = bvh.GetNodeElementCount(top);
+			for (int i = 0; i < triCount; i++)
+				if (IntersectShadowTriangle(ray, tMax, hitSide, elements[i]))
+					return true;
+			continue;
+		}
+
+		// Otherwise, push close and then far children.
+		const size_t leftID = bvh.GetNodeLeftChild(top);
+		const size_t rightID = bvh.GetNodeRightChild(top);
+
+		// Check for intersections
+		float tLeft = BIGFLOAT, tRight = BIGFLOAT;
+		const bool hitLeft = bvh.GetNodeBoundingBox(leftID).IntersectShadowRay(ray, tLeft, tMax);
+		const bool hitRight = bvh.GetNodeBoundingBox(rightID).IntersectShadowRay(ray, tRight, tMax);
+
+		// If we don't hit either child bounding box, the ray must be right on the edge, so just do nothing.
+		if (!hitLeft && !hitRight) continue;
+
+		// Determine which is closer
+		const size_t closeID = tLeft <= tRight ? leftID : rightID;
+		const size_t farID = tLeft <= tRight ? rightID : leftID;
+		const float tClose = fmin(tLeft, tRight);
+		const float tFar = fmax(tLeft, tRight);
+
+		// Push both entries to the stack, so that we pop close first
+		stack[stackTop++] = farID;
+		stack[stackTop++] = closeID;
+	}
+
+	return hitAnything;
 }
 
 __device__ bool MeshObject::IntersectTriangle(Ray const& ray, Hit& hit, const int hitSide, const unsigned int faceID) const {

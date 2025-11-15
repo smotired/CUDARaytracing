@@ -255,7 +255,7 @@ void AssignNodes( Loader const &loader, Node* nodeList, int& next, const Matrix&
 	}
 	else node->material = materials; // First material will be the default material
 
-	if ( HAS_OBJ(node->object) ) cuda::std::visit([&loader](const auto &object){ object->Load(loader); }, node->object);	// loads object-specific parameters (if any)
+	if ( HAS_OBJ(node->object) ) OBJ_LOAD(node->object, loader);	// loads object-specific parameters (if any)
 
 	// Apply transformations
 	Matrix translation, rotation, scale;

@@ -27,6 +27,8 @@ set(SRC_RDR
         renderer/renderer.cu
         renderer/trace.cu
         renderer/shading.cu
+        renderer/bvh.cu
+        renderer/bvh.cuh
 )
 
 set(SRC_SCN

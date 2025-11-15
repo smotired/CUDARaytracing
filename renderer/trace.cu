@@ -13,6 +13,9 @@ __global__ void TracePrimaryRays() {
     if (pX >= theScene.render.width || pY >= theScene.render.height)
         return;
 
+    // Initialize Z buffer
+    theScene.render.zBuffer[pI] = BIGFLOAT;
+
     Ray ray(theScene.camera.position, pixelCoords - theScene.camera.position, pI);
     TraceRay(ray);
 }
@@ -76,7 +79,8 @@ __device__ bool TraceShadowRay(ShadowRay& ray, const float3 n, const float tMax,
         }
 
         if (HAS_OBJ(node->object)) {
-            const bool hitBox = node->boundingBox.IntersectShadowRay(ray, tMax);
+            float dist;
+            const bool hitBox = node->boundingBox.IntersectShadowRay(ray, dist, tMax);
 
             // If we don't collide with parent bounding box, we don't collide with any child either.
             if (!hitBox) {

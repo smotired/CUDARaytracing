@@ -217,3 +217,21 @@ __host__ __device__ inline unsigned int& ref(uint3& a, const unsigned int i) {
         default: return a.x;
     }
 }
+
+__host__ __device__ inline float ref(const float3& a, const unsigned int i) {
+    switch (i) {
+        case 0: return a.x;
+        case 1: return a.y;
+        case 2: return a.z;
+        default: return a.x;
+    }
+}
+
+__host__ __device__ inline unsigned int ref(const uint3& a, const unsigned int i) {
+    switch (i) {
+        case 0: return a.x;
+        case 1: return a.y;
+        case 2: return a.z;
+        default: return a.x;
+    }
+}

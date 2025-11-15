@@ -3,6 +3,8 @@
 #include "../math/float3.cuh"
 #include "rays.cuh"
 #include <cuda/std/variant>
+
+#include "bvh.cuh"
 #include "mesh.cuh"
 
 // All objects must have the following methods:
@@ -38,8 +40,13 @@ public:
 
 class MeshObject : public Mesh {
 protected:
+    BVH bvh;
+
     __device__ bool IntersectTriangle(Ray const& ray, Hit& hit, int hitSide, unsigned int faceID) const;
     __device__ bool IntersectShadowTriangle(ShadowRay const& ray, float tMax, int hitSide, unsigned int faceID) const;
+    // Traverse the BVH until we find a leaf node, and then return the NodeID of said leaf node if we hit.
+    [[nodiscard]] __device__ bool Traverse(Ray const& ray, Hit& hit, int hitSide) const;
+    [[nodiscard]] __device__ bool TraverseShadow(ShadowRay const& ray, float tMax, int hitSide) const;
 public:
     __device__ bool IntersectRay(Ray const &ray, Hit& hit, int hitSide) const;
     __device__ bool IntersectShadowRay(const ShadowRay &ray, float tMax, int hitSide) const;
@@ -52,7 +59,7 @@ public:
         if (!LoadFromFileObj(filename)) return false;
         // if (!HasNormals()) ComputeNormals();
         ComputeBoundingBox();
-        // bvh.SetMesh(this, 4);
+        bvh.ConstructBVH(this);
         return true;
     }
 };
