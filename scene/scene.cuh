@@ -109,23 +109,26 @@ struct Scene {
     // How many materials are in the scene
     size_t materialCount;
 
+    // The environment texture
+    Texture* env;
+
     // Load the scene
     void Load( Loader const &loader );
 };
 
 class Material {
 public:
-    color diffuse = WHITE;  // How much light is scattered
-    color specular = WHITE; // How much light is reflected
+    Texture* diffuse = nullptr;  // How much light is scattered
+    Texture* specular = nullptr; // How much light is reflected
     float glossiness = 20;  // Smoothness of the surface
 
-    color reflection = BLACK; // How much light is directly reflected
-    color refraction = BLACK; // How much light is directly refracted
+    Texture* reflection = nullptr; // How much light is reflected (will be removed after path tracing)
+    Texture* refraction = nullptr; // How much light is directly refracted
     color absorption = BLACK; // How much light is absorbed
     float ior = 1;
 
     __device__ void Shade(Ray const& ray, Hit const& hit) const;
-    void SetViewportMaterial( int mtlID=0 ) const {} // used for OpenGL display
+    void SetViewportMaterial( int mtlID=0 ) const {} // used for OpenGL display (unused though i think)
     void Load( Loader const &loader ) { /* Will do something later */ }
 };
 

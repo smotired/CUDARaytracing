@@ -22,8 +22,10 @@
 
 #include <functional>
 
+#include "texture.cuh"
 #include "tinyxml2.cuh"
 #include "../math/color.cuh"
+#include "lodepng.cuh"
 
 //-------------------------------------------------------------------------------
 
@@ -58,6 +60,71 @@ public:
 	bool ReadInt  ( int   &i, char const *name="value" ) const { return elem && elem->QueryIntAttribute  ( name, &i ) == tinyxml2::XML_SUCCESS; }
 	void ReadFloat3( float3 &v, float3 const &def=F3_ZERO ) const { if (elem) { v=def; ReadFloat(v.x,"x"); ReadFloat(v.y,"y"); ReadFloat(v.z,"z"); float f=1; if ( ReadFloat(f) ) v *= f; } }
 	void ReadColor( color &c, color const &def=WHITE ) const { if (elem) { c=def; ReadFloat(c.x,"r"); ReadFloat(c.y,"g"); ReadFloat(c.z,"b"); float f=1; if ( ReadFloat(f) ) c *= f; } }
+
+private:
+	bool LoadTexture( String const& name, color** data, unsigned int& width, unsigned int& height ) const {
+		// yoinked from cem again
+		if ( name[0] == '\0' ) return false;
+		const size_t len = strlen(name);
+		if ( len < 3 ) return false;
+		bool success = false;
+
+		char ext[3] = { (char)tolower(name[len-3]), (char)tolower(name[len-2]), (char)tolower(name[len-1]) };
+		if ( strncmp(ext,"png",3) == 0 ) {
+			std::vector<unsigned char> d;
+			unsigned int w, h;
+			unsigned int error = lodepng::decode(d,w,h,(const char *)name,LCT_RGB);
+			if ( error == 0 ) {
+				width = w;
+				height = h;
+				*data = new color[width*height];
+				Color24* copied = new Color24[width*height];
+				memcpy( copied, d.data(), width*height*3 );
+
+				for ( unsigned int i = 0; i < width*height; i++ )
+					(*data)[i] = copied[i].ToColor();
+			}
+			success = (error == 0);
+		} // cem also supports ppm but icba
+
+		return success;
+	}
+
+public:
+	void ReadTexture( Texture** t, color const &def=WHITE ) const {
+		if (elem) {
+			// If there is a name for the texture, load it to this list
+			color* data = nullptr;
+			unsigned int width = 0, height = 0;
+			bool textureCreated = false;
+			const String name = Attribute("texture");
+			if (name) {
+				textureCreated = LoadTexture(name, &data, width, height);
+			}
+
+			// Otherwise create a single pixel for a solid color
+			if (!textureCreated) {
+				data = new color[1];
+				width = 1; height = 1;
+				data[0] = WHITE;
+			}
+
+			// Multiply it all by r, g, b
+			color mult = WHITE;
+			ReadFloat(mult.x,"r"); ReadFloat(mult.y,"g"); ReadFloat(mult.z,"b");
+			float f=1; if ( ReadFloat(f) ) mult *= f;
+			for (unsigned int i = 0; i < width * height; i++)
+				data[i] *= mult;
+
+			// Copy it to managed memory
+			cudaMallocManaged(t, sizeof(Texture));
+			*t = new Texture(data, width, height);
+		} else {
+			// If no color is provided, use the default color
+			cudaMallocManaged(t, sizeof(Texture));
+			*t = new Texture(def);
+		}
+	}
 
 	Loader const Child( char const *name ) const { return Loader( elem ? elem->FirstChildElement(name) : nullptr ); }
 

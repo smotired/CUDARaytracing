@@ -35,6 +35,8 @@ set(SRC_SCN
         scene/objects.cu
         scene/lights.cu
         scene/mesh.cu
+        scene/texture.cu
+        scene/texture.cuh
 )
 
 # --------------------------------

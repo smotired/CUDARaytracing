@@ -44,6 +44,10 @@ __device__ bool Sphere::IntersectRay(Ray const &ray, Hit& hit, const int hitSide
 			// Calculate hit position and normal vector, in object space.
 			hit.pos = ray.pos + front * ray.dir;
 			hit.n = hit.pos; // unit sphere is a special case.
+			hit.uvw = float3( // Spherical mapping
+				0.5f * OVERPI * atan2(hit.pos.y, hit.pos.x) + 0.5f,
+				OVERPI * asin(hit.pos.z) + 0.5f,
+				0);
 			hit.front = true;
 
 			return true;
@@ -58,6 +62,10 @@ __device__ bool Sphere::IntersectRay(Ray const &ray, Hit& hit, const int hitSide
 		hit.z = back;
 		hit.pos = ray.pos + back * ray.dir;
 		hit.n = hit.pos;
+		hit.uvw = float3( // Spherical mapping
+			0.5f * OVERPI * atan2(hit.pos.y, hit.pos.x) + 0.5f,
+			OVERPI * asin(hit.pos.z) + 0.5f,
+			0);
 		hit.front = false;
 
 		return true;
@@ -116,6 +124,7 @@ __device__ bool Plane::IntersectRay(Ray const& ray, Hit& hit, const int hitSide 
 	hit.z = t;
 	hit.pos = hitPos;
 	hit.n = F3_FORWARD; // the plane is z up
+	hit.uvw = 0.5f * (hitPos + float3(1, 1, 0));
 	hit.front = ray.dir.z < 0;
 	return true;
 }
@@ -299,11 +308,13 @@ __device__ bool MeshObject::IntersectTriangle(Ray const& ray, Hit& hit, const in
 	const float3 gn = asNorm(cross(edge1, edge2));
 
 	const float3 n = !HasNormals() ? gn : vn[fn[faceID].x] * barycentric.x + vn[fn[faceID].y] * barycentric.y + vn[fn[faceID].z] * barycentric.z;
+	const float3 uvw = !HasTextureVertices() ? F3_ZERO : vt[ft[faceID].x] * barycentric.x + vt[ft[faceID].y] * barycentric.y + vt[ft[faceID].z] * barycentric.z;
 
 	// Set up hit
 	hit.z = t;
 	hit.n = n;
 	hit.pos = ray.pos + t * ray.dir;
+	hit.uvw = uvw;
 	hit.front = ndot < 0;
 	return true;
 }

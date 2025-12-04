@@ -5,6 +5,7 @@
 #include "settings.cuh"
 #include "float3.cuh"
 #include "color.cuh"
+#include "texture.cuh"
 
 struct Node;
 class Material;
@@ -25,6 +26,9 @@ struct Hit {
     // Normal vector at hit point
     float3 n;
 
+    // Texture coords at hit point
+    float3 uvw;
+
     // If we hit the front of the object
     bool front;
 
@@ -42,6 +46,10 @@ struct Hit {
 
     // Initialize with default values
     __host__ __device__ Hit() : pos(F3_ZERO), z(BIGFLOAT), n(F3_UP), front(true), node(nullptr) {
+    }
+
+    __device__ color Eval(Texture const* texture) const {
+        return texture ? texture->Eval(uvw) : ((uvw.x > 0.5f) == (uvw.y > 0.5f) ? BLACK : color(1, 0, 1)); // return the standard missing texture if the texture is not initialized
     }
 };
 

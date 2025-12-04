@@ -54,7 +54,7 @@ __device__ void TraceRay(Ray &ray, int hitSide) {
 
     // Shade, or add color from environment. Assume no hit means no absorption.
     if (hitAnything) hit.node->material->Shade(ray, hit);
-    else theScene.render.results[ray.pixel] += ray.contribution * color(0, 0, 0.1f);
+    else theScene.render.results[ray.pixel] += ray.contribution * theScene.env->EvalEnvironment(ray.dir);
 
     // If this is a primary ray, update the Z buffer
     if (ray.IsPrimary() && hitAnything)

@@ -171,6 +171,16 @@ void Scene::Load( Loader const &sceneLoader )
 		new (&materials[i]) Material(); // Create a default material for each slot
 	cudaMallocManaged(&lights, sizeof(Light) * lightCount);
 
+	// Add basic textures for the default material
+	cudaMallocManaged(&materials[0].diffuse, sizeof(Texture));
+	materials[0].diffuse = new Texture(WHITE);
+	cudaMallocManaged(&materials[0].specular, sizeof(Texture));
+	materials[0].specular = new Texture(WHITE);
+	cudaMallocManaged(&materials[0].reflection, sizeof(Texture));
+	materials[0].reflection = new Texture(BLACK);
+	cudaMallocManaged(&materials[0].refraction, sizeof(Texture));
+	materials[0].refraction = new Texture(BLACK);
+
 	auto *materialTable = new unsigned int[2 * materialCount];
 	for (int i = 0; i < 2 * materialCount; i++) { materialTable[i] = 0; }
 	InsertMaterial(materialTable, materialCount, HASH("__DEFAULT_MTL__"), 0);
@@ -201,6 +211,9 @@ void Scene::Load( Loader const &sceneLoader )
 	// Go backwards and assign bounding boxes
 	for (int i = nodeCount - 1; i >= 0; i--)
 		nodes[i].CalculateBoundingBox(nodes, i);
+
+	// Load the environment into managed memory
+	sceneLoader.Child("environment").ReadTexture( &env );
 }
 
 size_t CountNodes( Loader const &loader ) {
@@ -375,11 +388,11 @@ void PointLight::Load( Loader const& loader ) {
 //-------------------------------------------------------------------------------
 
 void LoadMaterial( Loader const& loader, Material* materialList, int i, unsigned int* materialTable, size_t materialCount ) {
-	loader.Child("diffuse").ReadColor( materialList[i].diffuse );
-	loader.Child("specular").ReadColor( materialList[i].specular );
+	loader.Child("diffuse").ReadTexture( &materialList[i].diffuse );
+	loader.Child("specular").ReadTexture( &materialList[i].specular );
 	loader.Child("glossiness").ReadFloat( materialList[i].glossiness );
-	loader.Child("reflection").ReadColor( materialList[i].reflection );
-	loader.Child("refraction").ReadColor( materialList[i].refraction );
+	loader.Child("reflection").ReadTexture( &materialList[i].reflection, BLACK );
+	loader.Child("refraction").ReadTexture( &materialList[i].refraction, BLACK );
 	loader.Child("refraction").ReadFloat( materialList[i].ior, "index" );
 	loader.Child("absorption").ReadColor( materialList[i].absorption );
 
