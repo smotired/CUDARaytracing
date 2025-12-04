@@ -44,7 +44,7 @@ void Renderer::BeginRendering() {
     unsigned int convBlocks = (size + RAY_BLOCKDIM - 1) / RAY_BLOCKDIM;
     unsigned int convThreads = RAY_BLOCKDIM * RAY_BLOCKDIM;
     printf("Converting colors...\n");
-    ConvertColors<<<convBlocks, convThreads>>>(theScene.render.results, converted, size);
+    ConvertColors<<<convBlocks, convThreads>>>(theScene.render.results, converted, size, theScene.camera.sRGB);
     CLERR();
     CERR(cudaDeviceSynchronize());
     printf("Color conversion finished.\n");

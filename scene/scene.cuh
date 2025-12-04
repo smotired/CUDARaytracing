@@ -75,7 +75,10 @@ struct Camera {
     float fov;
 
     // Depth of field in world space units
-    // float dof;
+    float dof;
+
+    // If it uses sRGB color space
+    bool sRGB;
 
     // Load the camera
     void Load( Loader const &loader );

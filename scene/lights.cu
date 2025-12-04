@@ -23,5 +23,9 @@ __device__ color PointLight::Illuminate(const Hit &hit, float3 &dir) const {
     ShadowRay ray(hit.pos, dir);
     const bool obstructed = TraceShadowRay(ray, hit.n, length(position - hit.pos));
 
-    return obstructed ? BLACK : intensity;
+    // Add attenuation and radiance
+    const color radiance = intensity * (1.0f / (4 * M_PI * size * size));
+    const float attenuation = 1.0f / lengthsq(position - hit.pos);
+
+    return obstructed ? BLACK : radiance * attenuation;
 }

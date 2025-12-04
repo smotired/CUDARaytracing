@@ -48,6 +48,7 @@ public:
 class PointLight : public GLLight {
     color intensity = BLACK;
     float3 position = F3_ZERO;
+    float size = 1;
 public:
     __device__ bool IsAmbient() const { return false; }
     __device__ color Illuminate(const Hit &hit, float3& dir) const;

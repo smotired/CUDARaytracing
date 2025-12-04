@@ -6,7 +6,7 @@
 
 int main () {
     Renderer renderer;
-    renderer.LoadScene("scenes/proj7/checkerboard.xml");
+    renderer.LoadScene("scenes/proj13/box.xml");
     ShowViewport(&renderer, false);
 
     return 0;
