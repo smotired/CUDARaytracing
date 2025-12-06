@@ -42,4 +42,4 @@ private:
 };
 
 // Kernel to convert colors to the final Color24. Will do gamma correction here too
-__global__ void ConvertColors(color const* in, Color24 *out, size_t N, bool sRGB);
+__global__ void ConvertColors(color const* in, Color24 *out, size_t N, bool sRGB, float passMultiplier);

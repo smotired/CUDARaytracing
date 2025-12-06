@@ -50,7 +50,6 @@ static const char *uiControlsString =
  "F5    - Reloads the scene file.\n"
  "1     - Shows OpenGL view.\n"
  "2     - Shows the rendered image.\n"
- "3     - Shows the z (depth) image.\n"
  "Space - Starts/stops rendering.\n"
  "Esc   - Terminates software.\n"
  "Mouse Left Click - Writes the pixel information to the console.\n";
@@ -76,7 +75,6 @@ enum ViewMode
 {
 	VIEWMODE_OPENGL,
 	VIEWMODE_IMAGE,
-	VIEWMODE_Z,
 };
 
 enum MouseMode {
@@ -343,10 +341,6 @@ void GlutDisplay()
 	case VIEWMODE_IMAGE:
 		DrawImage( image.pixels, GL_UNSIGNED_BYTE, GL_RGB );
 		break;
-	case VIEWMODE_Z:
-		theRenderer->ComputeZBufferImage();
-		DrawImage( image.zBufferImg, GL_UNSIGNED_BYTE, GL_LUMINANCE );
-		break;
 	}
 	// if ( mode == MODE_RENDERING ) DrawRenderProgressBar();
 
@@ -359,11 +353,11 @@ void GlutIdle()
 {
 	const RenderedImage &image = theRenderer->GetImage();
 
-	// static int lastRenderedPixels = 0;
+	static unsigned int lastCompletedPasses = 0;
 	if ( mode == MODE_RENDERING ) {
-		// int nrp = theScene.render.pixelsRendered;
-		// if ( lastRenderedPixels != nrp ) {
-			// lastRenderedPixels = nrp;
+		const unsigned int nrp = theRenderer->GetImage().passes;
+		if ( lastCompletedPasses != nrp ) {
+			lastCompletedPasses = nrp;
 			if ( !theRenderer->IsRendering() ) {
 				if ( ! closeWhenDone ) mode = MODE_RENDER_DONE;
 				auto end = std::chrono::high_resolution_clock::now();
@@ -375,12 +369,10 @@ void GlutIdle()
 				int mus = duration % 1000000;
 				printf("\nRender time is %d:%02d:%02d.%06d.\n",h,m,s,mus);
 
-				theRenderer->ComputeZBufferImage();
 				image.SaveImage("output.png");
-				image.SaveZBufferImage("outputZ.png");
 			}
 			glutPostRedisplay();
-		// }
+		}
 		if ( closeWhenDone && !theRenderer->IsRendering() ) {
 			mode = MODE_RENDER_DONE;
 #ifdef FREEGLUT
@@ -432,11 +424,6 @@ void GlutKeyboard(unsigned char key, int x, int y)
 		glutSetWindowTitle(WINDOW_TITLE_IMAGE);
 		glutPostRedisplay();
 		break;
-	case '3':
-		viewMode = VIEWMODE_Z;
-		glutSetWindowTitle(WINDOW_TITLE_Z);
-		glutPostRedisplay();
-		break;
 	}
 }
 
@@ -481,12 +468,9 @@ void PrintPixelData(int x, int y)
 
 	if ( x >= 0 && y >= 0 && x < image.width && y < image.height ) {
 		Color24 *colors = image.pixels;
-		float *zbuffer = image.zBuffer;
 		int i = y * image.width + x;
 		printf("   Pixel: %4d, %4d\n   Color:  %3d,  %3d,  %3d\n", x, y, colors[i].r, colors[i].g, colors[i].b );
 		terminal_erase_line();
-		if ( zbuffer[i] == BIGFLOAT ) printf("Z-Buffer: max\n" );
-		else printf("Z-Buffer: %f\n", zbuffer[i] );
 	}
 }
 

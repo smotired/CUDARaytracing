@@ -4,7 +4,7 @@
 #include "renderer.cuh"
 
 // Fire primary rays from the camera origin to the center of the plane
-__global__ void TracePrimaryRays();
+__global__ void TracePrimaryRays(int passId);
 
 // Trace a ray through the scene and accumulate light
 __device__ void TracePath(Ray const& origin, color* target);

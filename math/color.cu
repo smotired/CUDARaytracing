@@ -16,8 +16,8 @@ __device__ inline color LinearTosRGB( const color c ) {
                  LinearTosRGB(c.z));
 }
 
-__global__ void ConvertColors(color const* in, Color24 *out, const size_t N, const bool sRGB) {
+__global__ void ConvertColors(color const* in, Color24 *out, const size_t N, const bool sRGB, const float passMultiplier) {
     const unsigned int i = blockIdx.x * blockDim.x + threadIdx.x;
     if (i >= N) return;
-    out[i] = Color24(sRGB ? LinearTosRGB(in[i]) : in[i]);
+    out[i] = Color24(sRGB ? LinearTosRGB(in[i] * passMultiplier) : in[i] * passMultiplier);
 }

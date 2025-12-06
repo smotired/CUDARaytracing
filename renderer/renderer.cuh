@@ -26,22 +26,18 @@ inline cudaError_t err = cudaSuccess; // Global variable to ensure these macros 
 struct RenderedImage {
     unsigned int width; unsigned int height;
     Color24* pixels;
-    float* zBuffer;
-    uint8_t* zBufferImg;
+    unsigned int passes;
 
     void Init(const int w, const int h) {
         width = w;
         height = h;
         pixels = new Color24[w * h];
-        zBuffer = new float[w * h];
-        zBufferImg = new uint8_t[w * h];
     }
 
     bool SaveImage(char const* filename) const {
         std::vector<Color24> converted(pixels, pixels+width*height);
         return lodepng::encode(filename, &converted[0].r, width, height, LCT_RGB, 8) == 0;
     }
-    bool SaveZBufferImage(char const* filename) const { return lodepng::encode(filename, zBufferImg, width, height, LCT_RGB, 8) == 0; }
 };
 
 //-------------------------------------------------------------------
@@ -73,9 +69,6 @@ public:
     [[nodiscard]] bool IsRendering() const { return rendering; }
     void BeginRendering();
     void StopRendering();
-
-    // Convert the RenderImage's z buffer to a black and white image for display
-    void ComputeZBufferImage() { ComputeImage<float,true>( image.zBuffer, image.zBufferImg, BIGFLOAT ); }
 private:
     // Compute a black and white image
     template <typename T, bool invert>
@@ -100,4 +93,7 @@ private:
         }
         return vmax;
     }
+
+    // This method should be on a thread to not block the display thread.
+    void DoRendering();
 };

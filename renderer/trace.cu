@@ -1,11 +1,11 @@
 #include "trace.cuh"
 
-constexpr float invertedSampoles = 1.0f / static_cast<float>(SAMPLES);
+constexpr float invertedSampleCount = 1.0f / static_cast<float>(SAMPLES);
 
-__global__ void TracePrimaryRays() {
+__global__ void TracePrimaryRays(const int passId) {
     // Each thread is responsible for 1 pixel in the block, across each iteration.
     // Define coords of starting pixel
-    const unsigned int pX = blockIdx.x * blockDim.x + threadIdx.x; // We only have 1 block right now
+    const unsigned int pX = blockIdx.x * blockDim.x + threadIdx.x;
     const unsigned int pY = blockIdx.y * blockDim.y + threadIdx.y;
     const unsigned int pI = pY * theScene.render.width + pX;
     const float3 pixelCoords = theScene.render.topLeftPixel
@@ -15,11 +15,20 @@ __global__ void TracePrimaryRays() {
     if (pX >= theScene.render.width || pY >= theScene.render.height)
         return;
 
-    // Initialize Z buffer
-    theScene.render.zBuffer[pI] = BIGFLOAT;
-
     for (int i = 0; i < SAMPLES; i++) {
-        Ray ray(theScene.camera.position, pixelCoords - theScene.camera.position, pI, 0, WHITE * invertedSampoles);
+        // Randomly offset start position by DOF
+        const float dof_r = sqrtf(theScene.rng->RandomFloat());
+        const float dof_theta = theScene.rng->RandomFloat() * 2 * M_PI;
+        const float dof_x = dof_r * cosf(dof_theta);
+        const float dof_y = dof_r * sinf(dof_theta);
+        const float3 rayStartPos = theScene.camera.position + theScene.camera.dof * (dof_x * theScene.render.cX - dof_y * theScene.render.cY);
+
+        // Randomly offset camera plane position for antialiasing
+        const float aa_x = theScene.rng->RandomFloat() - 0.5f;
+        const float aa_y = theScene.rng->RandomFloat() - 0.5f;
+        const float3 rayEndPos = pixelCoords + theScene.render.pixelSize * (aa_x * theScene.render.cX - aa_y * theScene.render.cY);
+
+        Ray ray(rayStartPos, rayEndPos - rayStartPos, pI, 0, WHITE * invertedSampleCount);
         TracePath(ray, theScene.render.results + pI);
     }
 }
@@ -84,13 +93,10 @@ __device__ void TracePath(Ray const& origin, color* target) {
             break;
         }
 
-        // Update minimum Z on a primary ray
-
         // Pick a random light, and get the material from the hit
         const int lightId = static_cast<int>(theScene.rng->RandomFloat() * theScene.lightCount);
         const Light* light = theScene.lights + lightId;
         const Material* mtl = hit.node->material;
-
 
         // Generate a sample for the light
         float3 lDir;
@@ -156,10 +162,6 @@ __device__ void TraceRay(Ray &ray, int hitSide) {
     // Shade, or add color from environment. Assume no hit means no absorption.
     if (hitAnything) hit.node->material->Shade(ray, hit);
     else theScene.render.results[ray.pixel] += ray.contribution * theScene.env->EvalEnvironment(ray.dir);
-
-    // If this is a primary ray, update the Z buffer
-    if (ray.IsPrimary() && hitAnything)
-        theScene.render.zBuffer[ray.pixel] = fmin(theScene.render.zBuffer[ray.pixel], hit.z);
 }
 
 // Not legacy

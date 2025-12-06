@@ -9,10 +9,10 @@
 #define BOUNCES 10000
 
 // How many samples to render per pass
-#define SAMPLES 512
+#define SAMPLES 256
 
-// How many passes to render
-#define PASSES 8
+// How many passes to render.
+#define PASSES 16
 
 // Maximum chance of a path to survive
 #define MAX_SURVIVAL 0.95f

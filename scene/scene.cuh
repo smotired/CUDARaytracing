@@ -32,9 +32,6 @@ struct RenderInfo {
     // Results of the render for each pixel
     color* results;
 
-    // Minimum distance in world space traveled by primary rays from each pixel
-    float* zBuffer;
-
     // Extra information that is constant for all rays:
 
     // Size of a single pixel in world space
