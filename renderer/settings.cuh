@@ -16,3 +16,6 @@
 
 // Maximum chance of a path to survive
 #define MAX_SURVIVAL 0.95f
+
+// Minimum probability for generating a sample, to avoid nans
+#define F_EPS 1.1920929e-7f

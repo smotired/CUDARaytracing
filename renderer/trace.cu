@@ -117,8 +117,11 @@ __device__ void TracePath(Ray const& origin, color* target, curandStateXORWOW_t 
         // Trace a shadow ray, and add estimation if not occluded.
         ShadowRay shadowRay(hit.pos, lDir);
         if (!TraceShadowRay(shadowRay, hit.n, lInfo.dist)) {
-            const float powerOverProb = lInfo.prob /  (lInfo.prob * lInfo.prob + brdf.prob * brdf.prob); // for efficiency we do not square numerator since we would just divide
-            *target += ray.contribution * lInfo.mult * brdf.mult * powerOverProb;
+            const float probDenom = lInfo.prob * lInfo.prob + brdf.prob * brdf.prob;
+            if (probDenom > F_EPS) {
+                const float powerOverProb = lInfo.prob / probDenom; // for efficiency we do not square numerator since we would just divide by it later
+                *target += ray.contribution * lInfo.mult * brdf.mult * powerOverProb;
+            }
         }
 
         // Set up the next ray and recurse if it doesn't die
@@ -129,6 +132,8 @@ __device__ void TracePath(Ray const& origin, color* target, curandStateXORWOW_t 
 
         ray.pos = hit.pos;
         ray.dir = nDir;
+        if (nInfo.prob <= F_EPS)
+            break;
         ray.contribution *= nInfo.mult * (1.0f / nInfo.prob);
     }
 }
