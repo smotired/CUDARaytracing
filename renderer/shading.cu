@@ -6,8 +6,9 @@
 #include "../scene/scene.cuh"
 
 constexpr float OVERPI = 1.0f / M_PI;
+constexpr float F_PI = static_cast<float>(M_PI);
 
-__device__ bool Material::GenerateSample(float3 const& v, Hit const &hit, float3 &dir, SampleInfo &info) const {
+__device__ bool Material::GenerateSample(float3 const& v, Hit const &hit, float3 &dir, curandStateXORWOW_t *rng, SampleInfo &info) const {
     // Calculate colors at this point
     const color kD = hit.Eval(diffuse);
     const color kS = hit.Eval(specular);
@@ -34,12 +35,12 @@ __device__ bool Material::GenerateSample(float3 const& v, Hit const &hit, float3
 	// multiply all mult by kA before returning
 
 	// Decide how the photon should bounce
-	const float p = theScene.rng->RandomFloat();
+	const float p = RandomFloat(rng);
 
 	if (p < pD) {
 		// Bounce diffusely. Pick a random direction from the hemisphere
-		const float x = theScene.rng->RandomFloat();
-		const float phi = theScene.rng->RandomFloat() * 2 * M_PI;
+		const float x = RandomFloat(rng);
+		const float phi = RandomFloat(rng) * 2 * F_PI;
 		const float cos_theta = 1 - x;
 		const float sin_theta = sqrtf(1 - cos_theta * cos_theta);
 
@@ -56,13 +57,13 @@ __device__ bool Material::GenerateSample(float3 const& v, Hit const &hit, float3
 	}
 
 	// Generate a glossy normal for reflections or refractions.
-	const float3 gln = glossyNormal(hit.n, glossiness, *theScene.rng);
+	const float3 gln = glossyNormal(hit.n, glossiness, rng);
 
 	if (p < pD + pS) {
 		// Bounce specularly. Reflect off the random normal.
 		dir = reflect(v, gln);
 		info.prob = pS * (glossiness + 1) * 0.5f * OVERPI * powf(gln % hit.n, glossiness + 1);
-		info.mult = kA * kS * (glossiness + 2) * 0.125f * OVERPI * powf(gln % hit.n, glossiness);
+		info.mult = kA * kS * (glossiness + 2) * 0.5f * OVERPI * powf(gln % hit.n, glossiness);
 
 		return true;
 	}
@@ -86,7 +87,7 @@ __device__ bool Material::GenerateSample(float3 const& v, Hit const &hit, float3
 
 		// If TIR does not happen, decide between fresnel or not
 		if (!tir) {
-			if (theScene.rng->RandomFloat() >= f_theta) {
+			if (RandomFloat(rng) >= f_theta) {
 				info.prob = pT * (1 - f_theta); // * (glossiness + 1) * 0.5f * OVERPI * powf(gln % hit.n, glossiness + 1);
 				info.mult = kA * kT * (1 - f_theta); // * (glossiness + 2) * 0.5f * OVERPI * powf(gln % hit.n, glossiness);
 			} else {
@@ -142,7 +143,7 @@ __device__ void Material::GetSampleInfo(float3 const& v, Hit const &hit, float3 
 		// = probability of choosing the half-vector as a glossy normal
 		const float3 rn = asNorm(v + dir);
 		info.prob += pS * (glossiness + 1) * 0.5f * OVERPI * powf(hit.n % rn, glossiness + 1);
-		info.mult += kS * (glossiness + 2) * 0.125f * OVERPI * powf(hit.n % rn, glossiness);
+		info.mult += kS * (glossiness + 2) * 0.5f * OVERPI * powf(hit.n % rn, glossiness);
 	}
 
 	// should include refraction but idk how lmao

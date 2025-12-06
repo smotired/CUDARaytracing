@@ -358,7 +358,7 @@ void GlutIdle()
 		const unsigned int nrp = theRenderer->GetImage().passes;
 		if ( lastCompletedPasses != nrp ) {
 			lastCompletedPasses = nrp;
-			if ( !theRenderer->IsRendering() ) {
+			if ( lastCompletedPasses == PASSES ) {
 				if ( ! closeWhenDone ) mode = MODE_RENDER_DONE;
 				auto end = std::chrono::high_resolution_clock::now();
 				auto duration = std::chrono::duration_cast<std::chrono::microseconds>(end - start).count();

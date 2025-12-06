@@ -1,5 +1,7 @@
 /// Header files for different types of lights
 #pragma once
+#include <curand_kernel.h>
+
 #include "../math/float3.cuh"
 #include "xmlload.cuh"
 #include <cuda/std/variant>
@@ -32,7 +34,7 @@ public:
     void Load( Loader const &loader );
 
     __device__ bool Intersect(Ray const& ray, Hit &hit) const { return false; }
-    __device__ bool GenerateSample(float3 const& v, Hit const& hit, float3& dir, SampleInfo& info) const { return false; };
+    __device__ bool GenerateSample(float3 const& v, Hit const& hit, float3& dir, curandStateXORWOW_t *rng, SampleInfo& info) const { return false; };
 };
 
 // -------- Directional
@@ -48,7 +50,7 @@ public:
     void Load( Loader const &loader );
 
     __device__ bool Intersect(Ray const& ray, Hit &hit) const { return false; }
-    __device__ bool GenerateSample(float3 const& v, Hit const& hit, float3& dir, SampleInfo& info) const { return false; };
+    __device__ bool GenerateSample(float3 const& v, Hit const& hit, float3& dir, curandStateXORWOW_t *rng, SampleInfo& info) const { return false; };
 };
 
 // -------- Point
@@ -65,7 +67,7 @@ public:
     void Load( Loader const &loader );
 
     __device__ bool Intersect(Ray const& ray, Hit &hit) const;
-    __device__ bool GenerateSample(float3 const& v, Hit const& hit, float3& dir, SampleInfo& info) const;
+    __device__ bool GenerateSample(float3 const& v, Hit const& hit, float3& dir, curandStateXORWOW_t *rng, SampleInfo& info) const;
 };
 
 // -------- Light union
@@ -80,5 +82,5 @@ using Light = cuda::std::variant<AmbientLight, DirectionalLight, PointLight>;
 #define LIGHT_ILLUMINATE(lightptr, hit, l) LIGHT_CALL(lightptr, { return light.Illuminate(hit, l); }, &hit, &l)
 #define LIGHT_SETVIEWPORTLIGHT(lightptr, lightID) LIGHT_CALL(lightptr, { light.SetViewportLight(lightID); }, lightID)
 #define LIGHT_LOAD(lightptr, loader) LIGHT_CALL_NCONST(lightptr, { light.Load(loader); }, &loader)
-#define LIGHT_GENSAMPLE(lightptr, v, hit, dir, info) LIGHT_CALL(lightptr, { return light.GenerateSample(v, hit, dir, info); }, &v, &hit, &dir, &info)
+#define LIGHT_GENSAMPLE(lightptr, v, hit, dir, rng, info) LIGHT_CALL(lightptr, { return light.GenerateSample(v, hit, dir, rng, info); }, &v, &hit, &dir, rng, &info)
 #define LIGHT_INTERSECT(lightptr, ray, hit) LIGHT_CALL(lightptr, { return light.Intersect(ray, hit); }, &ray, &hit)

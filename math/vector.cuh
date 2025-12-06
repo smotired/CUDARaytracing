@@ -21,4 +21,4 @@ __device__ float3 transmit(float3 incident, float3 normal, float outerIor, float
 /// <summary>
 /// Compute a random normal vector
 /// </summary>
-__device__ float3 glossyNormal(float3 normal, float glossiness, RNG& rng);
+__device__ float3 glossyNormal(float3 normal, float glossiness, curandStateXORWOW_t *rng);

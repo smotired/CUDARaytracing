@@ -12,7 +12,7 @@
 #define SAMPLES 256
 
 // How many passes to render.
-#define PASSES 256
+#define PASSES 16
 
 // Maximum chance of a path to survive
 #define MAX_SURVIVAL 0.95f

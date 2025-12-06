@@ -1,8 +1,11 @@
 #include "trace.cuh"
+#include <curand_kernel.h>
 
 constexpr float invertedSampleCount = 1.0f / static_cast<float>(SAMPLES);
+constexpr float F_PI = static_cast<float>(M_PI);
 
 __global__ void TracePrimaryRays(const int passId) {
+
     // Each thread is responsible for 1 pixel in the block, across each iteration.
     // Define coords of starting pixel
     const unsigned int pX = blockIdx.x * blockDim.x + threadIdx.x;
@@ -15,21 +18,25 @@ __global__ void TracePrimaryRays(const int passId) {
     if (pX >= theScene.render.width || pY >= theScene.render.height)
         return;
 
+    // Set up random number generation
+    curandStateXORWOW_t rng;
+    curand_init(pI, passId, 0, &rng);
+
     for (int i = 0; i < SAMPLES; i++) {
         // Randomly offset start position by DOF
-        const float dof_r = sqrtf(theScene.rng->RandomFloat());
-        const float dof_theta = theScene.rng->RandomFloat() * 2 * M_PI;
+        const float dof_r = sqrtf(RandomFloat(&rng));
+        const float dof_theta = RandomFloat(&rng) * 2 * F_PI;
         const float dof_x = dof_r * cosf(dof_theta);
         const float dof_y = dof_r * sinf(dof_theta);
         const float3 rayStartPos = theScene.camera.position + theScene.camera.dof * (dof_x * theScene.render.cX - dof_y * theScene.render.cY);
 
         // Randomly offset camera plane position for antialiasing
-        const float aa_x = theScene.rng->RandomFloat() - 0.5f;
-        const float aa_y = theScene.rng->RandomFloat() - 0.5f;
+        const float aa_x = RandomFloat(&rng) - 0.5f;
+        const float aa_y = RandomFloat(&rng) - 0.5f;
         const float3 rayEndPos = pixelCoords + theScene.render.pixelSize * (aa_x * theScene.render.cX - aa_y * theScene.render.cY);
 
         Ray ray(rayStartPos, rayEndPos - rayStartPos, pI, 0, WHITE * invertedSampleCount);
-        TracePath(ray, theScene.render.results + pI);
+        TracePath(ray, theScene.render.results + pI, &rng);
     }
 }
 
@@ -73,7 +80,7 @@ __device__ bool TraceThroughScene(Ray& ray, Hit& hit) {
     return hitAnything;
 }
 
-__device__ void TracePath(Ray const& origin, color* target) {
+__device__ void TracePath(Ray const& origin, color* target, curandStateXORWOW_t *rng) {
     Ray ray = origin;
     while (ray.bounce < BOUNCES) {
         const float3 v = -asNorm(ray.dir);
@@ -94,14 +101,14 @@ __device__ void TracePath(Ray const& origin, color* target) {
         }
 
         // Pick a random light, and get the material from the hit
-        const int lightId = static_cast<int>(theScene.rng->RandomFloat() * theScene.lightCount);
+        const int lightId = static_cast<int>(RandomFloat(rng) * static_cast<float>(theScene.lightCount));
         const Light* light = theScene.lights + lightId;
         const Material* mtl = hit.node->material;
 
         // Generate a sample for the light
         float3 lDir;
         SampleInfo lInfo;
-        LIGHT_GENSAMPLE(light, v, hit, lDir, lInfo);
+        LIGHT_GENSAMPLE(light, v, hit, lDir, rng, lInfo);
 
         // Generate probability from BRDF
         SampleInfo brdf;
@@ -117,7 +124,7 @@ __device__ void TracePath(Ray const& origin, color* target) {
         // Set up the next ray and recurse if it doesn't die
         float3 nDir;
         SampleInfo nInfo;
-        if (!mtl->GenerateSample(v, hit, nDir, nInfo))
+        if (!mtl->GenerateSample(v, hit, nDir, rng, nInfo))
             break;
 
         ray.pos = hit.pos;

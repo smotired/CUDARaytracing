@@ -86,9 +86,6 @@ struct Scene {
     // The information about the camera
     Camera camera;
 
-    // The global random number generator to use.
-    RNG* rng;
-
     // The nodes in the tree, in depth-first order
     Node* nodes;
 
@@ -129,7 +126,7 @@ public:
     void SetViewportMaterial( int mtlID=0 ) const {} // used for OpenGL display (unused though i think)
     void Load( Loader const &loader ) { /* Will do something later */ }
 
-    __device__ bool GenerateSample(float3 const& v, Hit const& hit, float3& dir, SampleInfo& info) const;
+    __device__ bool GenerateSample(float3 const& v, Hit const& hit, float3& dir, curandStateXORWOW_t *rng, SampleInfo& info) const;
     __device__ void GetSampleInfo(float3 const& v, Hit const& hit, float3 const& dir, SampleInfo &info) const;
 };
 

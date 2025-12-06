@@ -5,18 +5,19 @@
 #include "rays.cuh"
 
 constexpr float OVERPI = 1.0f / M_PI;
+constexpr float F_PI = static_cast<float>(M_PI);
 
-__device__ bool PointLight::GenerateSample(float3 const& v, Hit const &hit, float3 &dir, SampleInfo &info) const {
+__device__ bool PointLight::GenerateSample(float3 const& v, Hit const &hit, float3 &dir, curandStateXORWOW_t *rng, SampleInfo &info) const {
     // Pick a random point on the visible half of the sphere
     const float3 L = asNorm(hit.pos - position);
-    const float x = theScene.rng->RandomFloat();
-    const float phi = theScene.rng->RandomFloat() * 2 * M_PI;
+    const float x = RandomFloat(rng);
+    const float phi = RandomFloat(rng) * 2 * F_PI;
     const float cos_theta = 1 - x;
     const float sin_theta = sqrtf(1 - cos_theta * cos_theta);
 
     float3 a, b;
     orthonormals(L, a, b);
-    float3 n = L * cos_theta + a * sin_theta * cosf(phi) + b * sin_theta * sinf(phi);
+    const float3 n = L * cos_theta + a * sin_theta * cosf(phi) + b * sin_theta * sinf(phi);
 
     // Set up direction ot that point
     const float3 target = position + n * size;
@@ -25,7 +26,7 @@ __device__ bool PointLight::GenerateSample(float3 const& v, Hit const &hit, floa
     const float cos_theta_l = dir % -asNorm(target - position);
 
     // Set up the info
-    info.prob = d2 / (2 * M_PI * size * size * cos_theta_l);
+    info.prob = d2 / (2 * F_PI * size * size * cos_theta_l);
     info.mult = Radiance();
     info.dist = sqrtf(d2);
 
@@ -111,7 +112,7 @@ __device__ color PointLight::Illuminate(const Hit &hit, float3 &dir) const {
     const bool obstructed = TraceShadowRay(ray, hit.n, length(position - hit.pos));
 
     // Add attenuation and radiance
-    const color radiance = intensity * (1.0f / (4 * M_PI * size * size));
+    const color radiance = intensity * (1.0f / (4 * F_PI * size * size));
     const float attenuation = 1.0f / lengthsq(position - hit.pos);
 
     return obstructed ? BLACK : radiance * attenuation;

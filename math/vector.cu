@@ -36,10 +36,10 @@ __device__ float3 transmit(const float3 incident, const float3 normal, const flo
     return -normal * sqrtf(cos_phi_squared) + eta * (cos_theta * normal - incident);
 }
 
-__device__ float3 glossyNormal(const float3 normal, const float glossiness, RNG& rng) {
+__device__ float3 glossyNormal(const float3 normal, const float glossiness, curandStateXORWOW_t *rng) {
     // Calculate random variables for the CDF and for phi (yaw angle)
-    const float x = rng.RandomFloat();
-    const float phi = rng.RandomFloat() * M_PI * 2.0f;
+    const float x = RandomFloat(rng);
+    const float phi = RandomFloat(rng) * M_PI * 2.0f;
 
     // Calculate cos_theta from the cdf
     const float cos_theta = powf(1 - x, 1.0f / (glossiness + 1.0f));
