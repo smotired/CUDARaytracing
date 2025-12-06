@@ -25,7 +25,7 @@ void Renderer::DoRendering() {
     CERR(cudaMalloc(&converted, sizeof(Color24) * size));
 
     // Set up the thread count
-    dim3 numBlocks((theScene.render.width + RAY_BLOCKDIM - 1) / RAY_BLOCKDIM, (theScene.render.width + RAY_BLOCKDIM - 1) / RAY_BLOCKDIM);
+    dim3 numBlocks((theScene.render.width + RAY_BLOCKDIM - 1) / RAY_BLOCKDIM, (theScene.render.height + RAY_BLOCKDIM - 1) / RAY_BLOCKDIM);
     dim3 threadsPerBlock(RAY_BLOCKDIM, RAY_BLOCKDIM);
     unsigned int convBlocks = (size + RAY_BLOCKDIM - 1) / RAY_BLOCKDIM;
     unsigned int convThreads = RAY_BLOCKDIM * RAY_BLOCKDIM;
