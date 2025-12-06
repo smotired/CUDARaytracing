@@ -6,7 +6,6 @@
 #include "../math/float3.cuh"
 #include "../math/color.cuh"
 #include "../scene/scene.cuh"
-#include "../scene/objects.cuh"
 
 // Program macros
 #define RAY_BLOCKDIM 16

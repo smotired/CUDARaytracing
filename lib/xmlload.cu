@@ -214,6 +214,10 @@ void Scene::Load( Loader const &sceneLoader )
 
 	// Load the environment into managed memory
 	sceneLoader.Child("environment").ReadTexture( &env, BLACK );
+
+	// Set up the RNG
+	cudaMallocManaged(&rng, sizeof(RNG));
+	rng = new RNG();
 }
 
 size_t CountNodes( Loader const &loader ) {

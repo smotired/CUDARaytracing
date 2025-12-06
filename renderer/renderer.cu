@@ -19,9 +19,9 @@ void Renderer::BeginRendering() {
     dim3 threadsPerBlock(RAY_BLOCKDIM, RAY_BLOCKDIM);
 
     // Increase stack size on device
-    size_t originalStackSize;
-    CERR(cudaDeviceGetLimit(&originalStackSize, cudaLimitStackSize));
-    CERR(cudaDeviceSetLimit(cudaLimitStackSize, RAY_STACK_KB * 1024));
+    // size_t originalStackSize;
+    // CERR(cudaDeviceGetLimit(&originalStackSize, cudaLimitStackSize));
+    // CERR(cudaDeviceSetLimit(cudaLimitStackSize, RAY_STACK_KB * 1024));
 
     // Launch kernel
     printf("Launching kernel...\n");
@@ -35,7 +35,7 @@ void Renderer::BeginRendering() {
     cudaFree(theScene.render.zBuffer);
 
     // Revert stack size on device
-    CERR(cudaDeviceSetLimit(cudaLimitStackSize, originalStackSize));
+    // CERR(cudaDeviceSetLimit(cudaLimitStackSize, originalStackSize));
 
     // Convert results to image format
     Color24 *converted;

@@ -1,5 +1,7 @@
 #include "trace.cuh"
 
+constexpr float invertedSampoles = 1.0f / static_cast<float>(SAMPLES);
+
 __global__ void TracePrimaryRays() {
     // Each thread is responsible for 1 pixel in the block, across each iteration.
     // Define coords of starting pixel
@@ -16,10 +18,109 @@ __global__ void TracePrimaryRays() {
     // Initialize Z buffer
     theScene.render.zBuffer[pI] = BIGFLOAT;
 
-    Ray ray(theScene.camera.position, pixelCoords - theScene.camera.position, pI);
-    TraceRay(ray);
+    for (int i = 0; i < SAMPLES; i++) {
+        Ray ray(theScene.camera.position, pixelCoords - theScene.camera.position, pI, 0, WHITE * invertedSampoles);
+        TracePath(ray, theScene.render.results + pI);
+    }
 }
 
+// Trace a ray through the scene and return true if it hits anything
+__device__ bool TraceThroughScene(Ray& ray, Hit& hit) {
+    // Add some bias
+    ray.pos += ray.dir * BIAS;
+    const int hitSide = ray.IsPrimary() ? HIT_FRONT : HIT_FRONT_AND_BACK;
+
+    // Loop through the object list
+    bool hitAnything = false;
+    for (int i = 0; i < theScene.nodeCount; i++) {
+        Node* node = theScene.nodes + i;
+
+        if (HAS_OBJ(node->object)) {
+            // Check for intersection with its bounding box
+            float boxZ = BIGFLOAT;
+            const bool hitBox = node->boundingBox.IntersectRay(ray, boxZ);
+
+            if (hitBox && boxZ < hit.z) {
+                // Check for intersection with the actual object, and transform hit
+                node->ToLocal(ray);
+                if (OBJ_INTERSECT(node->object, ray, hit, hitSide)) {
+                    hitAnything = true;
+                    node->FromLocal(hit);
+                }
+                node->FromLocal(ray);
+            }
+        }
+    }
+
+    // Loop through the light list too
+    for (int i = 0; i < theScene.lightCount; i++) {
+        Light* thisLight = theScene.lights + i;
+        if (LIGHT_INTERSECT(thisLight, ray, hit)) {
+            hitAnything = true;
+            hit.light = thisLight;
+        }
+    }
+
+    return hitAnything;
+}
+
+__device__ void TracePath(Ray const& origin, color* target) {
+    Ray ray = origin;
+    while (ray.bounce < BOUNCES) {
+        const float3 v = -asNorm(ray.dir);
+
+        // Initialize a hit and trace the ray through the scene
+        Hit hit;
+        const bool hitAnything = TraceThroughScene(ray, hit);
+        if (!hitAnything) {
+            *target += ray.contribution * theScene.env->EvalEnvironment(ray.dir);
+            break;
+        }
+
+        // If we hit a light, just end at the light's radiance.
+        if (hit.hitLight) {
+            Light* light = hit.light;
+            *target += ray.contribution * LIGHT_RADIANCE(light);
+            break;
+        }
+
+        // Update minimum Z on a primary ray
+
+        // Pick a random light, and get the material from the hit
+        const int lightId = static_cast<int>(theScene.rng->RandomFloat() * theScene.lightCount);
+        const Light* light = theScene.lights + lightId;
+        const Material* mtl = hit.node->material;
+
+
+        // Generate a sample for the light
+        float3 lDir;
+        SampleInfo lInfo;
+        LIGHT_GENSAMPLE(light, v, hit, lDir, lInfo);
+
+        // Generate probability from BRDF
+        SampleInfo brdf;
+        mtl->GetSampleInfo(v, hit, lDir, brdf);
+
+        // Trace a shadow ray, and add estimation if not occluded.
+        ShadowRay shadowRay(hit.pos, lDir);
+        if (!TraceShadowRay(shadowRay, hit.n, lInfo.dist)) {
+            const float powerOverProb = lInfo.prob /  (lInfo.prob * lInfo.prob + brdf.prob * brdf.prob); // for efficiency we do not square numerator since we would just divide
+            *target += ray.contribution * lInfo.mult * brdf.mult * powerOverProb;
+        }
+
+        // Set up the next ray and recurse if it doesn't die
+        float3 nDir;
+        SampleInfo nInfo;
+        if (!mtl->GenerateSample(v, hit, nDir, nInfo))
+            break;
+
+        ray.pos = hit.pos;
+        ray.dir = nDir;
+        ray.contribution *= nInfo.mult * (1.0f / nInfo.prob);
+    }
+}
+
+// Legacy
 __device__ void TraceRay(Ray &ray, int hitSide) {
     // Add some bias
     ray.pos += ray.dir * BIAS;
@@ -61,6 +162,7 @@ __device__ void TraceRay(Ray &ray, int hitSide) {
         theScene.render.zBuffer[ray.pixel] = fmin(theScene.render.zBuffer[ray.pixel], hit.z);
 }
 
+// Not legacy
 __device__ bool TraceShadowRay(ShadowRay& ray, const float3 n, const float tMax, const int hitSide) {
     // Add some bias
     ray.pos += ray.dir * BIAS + n * BIAS;

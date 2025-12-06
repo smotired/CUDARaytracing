@@ -49,6 +49,7 @@ __device__ bool Sphere::IntersectRay(Ray const &ray, Hit& hit, const int hitSide
 				OVERPI * asin(hit.pos.z) + 0.5f,
 				0);
 			hit.front = true;
+			hit.hitLight = false;
 
 			return true;
 		}
@@ -67,6 +68,7 @@ __device__ bool Sphere::IntersectRay(Ray const &ray, Hit& hit, const int hitSide
 			OVERPI * asin(hit.pos.z) + 0.5f,
 			0);
 		hit.front = false;
+		hit.hitLight = false;
 
 		return true;
 	}
@@ -126,6 +128,7 @@ __device__ bool Plane::IntersectRay(Ray const& ray, Hit& hit, const int hitSide 
 	hit.n = F3_FORWARD; // the plane is z up
 	hit.uvw = 0.5f * (hitPos + float3(1, 1, 0));
 	hit.front = ray.dir.z < 0;
+	hit.hitLight = false;
 	return true;
 }
 
@@ -316,6 +319,7 @@ __device__ bool MeshObject::IntersectTriangle(Ray const& ray, Hit& hit, const in
 	hit.pos = ray.pos + t * ray.dir;
 	hit.uvw = uvw;
 	hit.front = ndot < 0;
+	hit.hitLight = false;
 	return true;
 }
 

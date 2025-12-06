@@ -6,6 +6,7 @@
 #include "float3.cuh"
 #include "color.cuh"
 #include "texture.cuh"
+#include "lights.cuh"
 
 struct Node;
 class Material;
@@ -34,6 +35,12 @@ struct Hit {
 
     // Pointer to the node that we hit
     Node* node;
+
+    // If we hit a light
+    bool hitLight;
+
+    // Pointer to the light that we hit
+    Light* light;
 
     // Initialize with default values
     __host__ __device__ void Init() {
