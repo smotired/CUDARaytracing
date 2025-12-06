@@ -33,7 +33,6 @@ __device__ bool PointLight::GenerateSample(float3 const& v, Hit const &hit, floa
 }
 
 __device__ bool PointLight::Intersect(Ray const &ray, Hit &hit) const {
-    return false;
     // Mostly copied from sphere: intersectRay
     const float3 o = ray.pos - position; // local ray origin
 
