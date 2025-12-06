@@ -72,7 +72,7 @@ __device__ bool Material::GenerateSample(float3 const& v, Hit const &hit, float3
 		// Pick eta values and normal based on front/back hit
 		const float eta_i = hit.front ? 1 : ior;
 		const float eta_o = hit.front ? ior : 1;
-		const float3 h = hit.front ? hit.n : -hit.n;
+		const float3 h = hit.front ? gln : -gln;
 
 		// Calculate transmittance direction and if TIR occurs
 		bool tir = false;
@@ -87,12 +87,12 @@ __device__ bool Material::GenerateSample(float3 const& v, Hit const &hit, float3
 		// If TIR does not happen, decide between fresnel or not
 		if (!tir) {
 			if (theScene.rng->RandomFloat() >= f_theta) {
-				info.prob = pT * (1 - f_theta);
-				info.mult = kA * kT * (1 - f_theta);
+				info.prob = pT * (1 - f_theta); // * (glossiness + 1) * 0.5f * OVERPI * powf(gln % hit.n, glossiness + 1);
+				info.mult = kA * kT * (1 - f_theta); // * (glossiness + 2) * 0.5f * OVERPI * powf(gln % hit.n, glossiness);
 			} else {
 				dir = reflect(v, h);
-				info.prob = pT * f_theta;
-				info.mult = kA * kT * f_theta;
+				info.prob = pT * f_theta; // * (glossiness + 1) * 0.5f * OVERPI * powf(gln % hit.n, glossiness + 1);
+				info.mult = kA * kT * f_theta; // * (glossiness + 2) * 0.5f * OVERPI * powf(gln % hit.n, glossiness);
 			}
 		}
 
