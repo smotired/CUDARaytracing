@@ -21,3 +21,22 @@ __global__ void ConvertColors(color const* in, Color24 *out, const size_t N, con
     if (i >= N) return;
     out[i] = Color24(sRGB ? LinearTosRGB(in[i] * passMultiplier) : in[i] * passMultiplier);
 }
+
+__global__ void ConvertColors(float const* in, Color24 *out, const size_t N, const bool sRGB) {
+    const unsigned int i = blockIdx.x * blockDim.x + threadIdx.x;
+    if (i >= N) return;
+    const color col = color(in[3 * i], in[3 * i + 1], in[3 * i + 2]);
+    out[i] = Color24(sRGB ? LinearTosRGB(col) : col);
+}
+
+__global__ void PrepareForDenoise(color const* results, float* oidnBeauty, const size_t N, const float passMultiplier) {
+    const unsigned int i = blockIdx.x * blockDim.x + threadIdx.x;
+    if (i >= N) return;
+
+    // All of the input arrays are totaled for each pass so we must divide as well.
+
+    // Set up the beauty
+    oidnBeauty[3 * i]     = results[i].x * passMultiplier;
+    oidnBeauty[3 * i + 1] = results[i].y * passMultiplier;
+    oidnBeauty[3 * i + 2] = results[i].z * passMultiplier;
+}

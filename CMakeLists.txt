@@ -51,15 +51,20 @@ add_executable(${PROJECT_NAME} ${SRC_MAIN} ${SRC_IO} ${SRC_MATH} ${SRC_RDR} ${SR
 target_include_directories(${PROJECT_NAME} PRIVATE lib math renderer scene)
 
 # --------------------------------
-# Link FreeGLUT
+# Link FreeGLUT and OIDN
 # --------------------------------
 
 find_package(OpenGL REQUIRED)
 find_package(GLUT REQUIRED)
 
+set(OIDN_ROOT "${CMAKE_SOURCE_DIR}/lib/OpenImageDenoise")
+link_directories("${OIDN_ROOT}/lib")
+
 target_link_libraries(${PROJECT_NAME} PRIVATE
         ${OPENGL_LIBRARIES}
         ${GLUT_LIBRARIES}
+        "${OIDN_ROOT}/lib/libOpenImageDenoise.so"
+        "${OIDN_ROOT}/lib/libtbb.so"
 )
 
 # --------------------------------

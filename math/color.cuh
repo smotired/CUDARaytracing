@@ -43,3 +43,9 @@ private:
 
 // Kernel to convert colors to the final Color24. Will do gamma correction here too
 __global__ void ConvertColors(color const* in, Color24 *out, size_t N, bool sRGB, float passMultiplier);
+
+// Kernel to convert colors to the final Color24. Will do gamma correction here too
+__global__ void ConvertColors(float const* in, Color24 *out, size_t N, bool sRGB);
+
+// Kernel to convert colors (and later normals/albedo) to the versions for OIDN
+__global__ void PrepareForDenoise(color const* results, float* oidnBeauty, size_t N, float passMultiplier);

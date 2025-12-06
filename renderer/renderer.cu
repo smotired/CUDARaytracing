@@ -1,4 +1,5 @@
 #include "trace.cuh"
+#include <OpenImageDenoise/oidn.h>
 
 // The scene that we are rendering
 __managed__ Scene theScene;
@@ -27,7 +28,7 @@ void Renderer::DoRendering() {
     // Set up the thread count
     dim3 numBlocks((theScene.render.width + RAY_BLOCKDIM - 1) / RAY_BLOCKDIM, (theScene.render.height + RAY_BLOCKDIM - 1) / RAY_BLOCKDIM);
     dim3 threadsPerBlock(RAY_BLOCKDIM, RAY_BLOCKDIM);
-    unsigned int convBlocks = (size + RAY_BLOCKDIM - 1) / RAY_BLOCKDIM;
+    unsigned int convBlocks = (size + RAY_BLOCKDIM * RAY_BLOCKDIM - 1) / (RAY_BLOCKDIM * RAY_BLOCKDIM);
     unsigned int convThreads = RAY_BLOCKDIM * RAY_BLOCKDIM;
 
     image.passes = 0;
@@ -56,11 +57,69 @@ void Renderer::DoRendering() {
         // Refresh display
         image.passes++;
     }
+    printf("================================\n");
+
+    /*
+    // WITHOUT DENOISER
 
     // Free remaining cuda memory
-    printf("================================\nFreeing final memory.\n");
+    printf("Freeing final memory.\n");
     CERR(cudaFree(converted));
     CERR(cudaFree(theScene.render.results));
+
+    */
+
+    // WITH DENOISER
+
+    // Format colors, normals, albedo into a format processable by OIDN.
+    printf("Preparing for denoise.\n");
+    float *prepColors;
+    CERR(cudaMalloc(&prepColors, size * 3 * sizeof(float)));
+
+    PrepareForDenoise<<<convBlocks, convThreads>>>(theScene.render.results, prepColors, size, 1.0f / static_cast<float>(PASSES));
+    CLERR();
+    CERR(cudaDeviceSynchronize());
+    CERR(cudaFree(theScene.render.results));
+
+    printf("Preparing OIDN device and filter\n");
+    OIDNDevice device = oidnNewDevice(OIDN_DEVICE_TYPE_DEFAULT);
+    oidnCommitDevice(device);
+
+    OIDNBuffer colorBuffer = oidnNewBuffer(device, size * 3 * sizeof(float));
+
+    // TODO: Filter creation is supposedly expensive so might do it elsewhere
+    OIDNFilter filter = oidnNewFilter(device, "RT");
+    oidnSetFilterImage(filter, "color", colorBuffer, OIDN_FORMAT_FLOAT3, theScene.render.width, theScene.render.height, 0, 0, 0);
+    oidnSetFilterImage(filter, "output", colorBuffer, OIDN_FORMAT_FLOAT3, theScene.render.width, theScene.render.height, 0, 0, 0);
+    oidnCommitFilter(filter);
+
+    // Fill input image buffers
+    printf("Filling buffer\n");
+    CERR(cudaMemcpy(oidnGetBufferData(colorBuffer), prepColors, size * 3 * sizeof(float), cudaMemcpyDeviceToHost));
+    CERR(cudaFree(prepColors));
+
+    // Filter the beauty image
+    printf("Executing denoiser\n");
+    oidnExecuteFilter(filter);
+    const char* errorMessage;
+    if (oidnGetDeviceError(device, &errorMessage) != OIDN_ERROR_NONE)
+        printf("Error: %s\n", errorMessage);
+
+    // Convert colors
+    printf("Converting colors...\n");
+    float *filteredColors;
+    CERR(cudaMalloc(&filteredColors, size * 3 * sizeof(float)));
+    CERR(cudaMemcpy(filteredColors, oidnGetBufferData(colorBuffer), size * 3 * sizeof(float), cudaMemcpyHostToDevice));
+
+    ConvertColors<<<convBlocks, convThreads>>>(filteredColors, converted, size, theScene.camera.sRGB);
+    CLERR();
+    CERR(cudaDeviceSynchronize());
+    printf("Color conversion finished.\n");
+
+    // Bring results to host
+    CERR(cudaMemcpy(image.pixels, converted, sizeof(Color24) * size, cudaMemcpyDeviceToHost));
+    CERR(cudaFree(converted));
+    image.passes++;
 
     // We are done
     rendering = false;

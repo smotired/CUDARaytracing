@@ -358,7 +358,7 @@ void GlutIdle()
 		const unsigned int nrp = theRenderer->GetImage().passes;
 		if ( lastCompletedPasses != nrp ) {
 			lastCompletedPasses = nrp;
-			if ( lastCompletedPasses == PASSES ) {
+			if ( lastCompletedPasses == PASSES + 1 ) { // + 1 because of the denoiser pass
 				if ( ! closeWhenDone ) mode = MODE_RENDER_DONE;
 				auto end = std::chrono::high_resolution_clock::now();
 				auto duration = std::chrono::duration_cast<std::chrono::microseconds>(end - start).count();
