@@ -7,6 +7,7 @@
 #include "rays.cuh"
 #include "objects.cuh"
 #include "lights.cuh"
+#include "rng.cuh"
 
 // Overview objects
 struct RenderInfo;
@@ -28,17 +29,8 @@ struct RenderInfo {
     // Height of the image in pixels
     unsigned int height;
 
-    // If the camera renders in sRGB
-    // bool sRGB;
-
     // Results of the render for each pixel
     color* results;
-
-    // Minimum distance in world space traveled by primary rays from each pixel
-    float* zBuffer;
-
-    // Primary ray counts per pixel
-    // unsigned int* sampleCounts;
 
     // Extra information that is constant for all rays:
 
@@ -75,7 +67,10 @@ struct Camera {
     float fov;
 
     // Depth of field in world space units
-    // float dof;
+    float dof;
+
+    // If it uses sRGB color space
+    bool sRGB;
 
     // Load the camera
     void Load( Loader const &loader );
@@ -90,6 +85,9 @@ struct Scene {
 
     // The information about the camera
     Camera camera;
+
+    // The global random number generator to use.
+    RNG* rng;
 
     // The nodes in the tree, in depth-first order
     Node* nodes;
@@ -127,9 +125,12 @@ public:
     color absorption = BLACK; // How much light is absorbed
     float ior = 1;
 
-    __device__ void Shade(Ray const& ray, Hit const& hit) const;
+    __device__ void Shade(Ray const& ray, Hit const& hit) const; // Legacy
     void SetViewportMaterial( int mtlID=0 ) const {} // used for OpenGL display (unused though i think)
     void Load( Loader const &loader ) { /* Will do something later */ }
+
+    __device__ bool GenerateSample(float3 const& v, Hit const& hit, float3& dir, SampleInfo& info) const;
+    __device__ void GetSampleInfo(float3 const& v, Hit const& hit, float3 const& dir, SampleInfo &info) const;
 };
 
 /// <summary>

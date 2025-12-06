@@ -29,6 +29,8 @@ set(SRC_RDR
         renderer/shading.cu
         renderer/bvh.cu
         renderer/bvh.cuh
+        renderer/rng.cuh
+        renderer/sampler.cuh
 )
 
 set(SRC_SCN

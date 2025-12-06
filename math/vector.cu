@@ -35,3 +35,23 @@ __device__ float3 transmit(const float3 incident, const float3 normal, const flo
     totalInnerReflection = false;
     return -normal * sqrtf(cos_phi_squared) + eta * (cos_theta * normal - incident);
 }
+
+__device__ float3 glossyNormal(const float3 normal, const float glossiness, RNG& rng) {
+    // Calculate random variables for the CDF and for phi (yaw angle)
+    const float x = rng.RandomFloat();
+    const float phi = rng.RandomFloat() * M_PI * 2.0f;
+
+    // Calculate cos_theta from the cdf
+    const float cos_theta = powf(1 - x, 1.0f / (glossiness + 1.0f));
+
+    // Calculate the half vector from cos_theta and the normals
+    float3 u, v;
+    orthonormals(normal, u, v);
+
+    const float sin_theta = sqrtf(1 - cos_theta * cos_theta);
+    const float cos_phi = cosf(phi);
+    const float sin_phi = sinf(phi);
+
+    // Return half vector as normal vector
+    return normal * cos_theta + u * sin_theta * cos_phi + v * sin_theta * sin_phi;
+}

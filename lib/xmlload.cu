@@ -213,7 +213,11 @@ void Scene::Load( Loader const &sceneLoader )
 		nodes[i].CalculateBoundingBox(nodes, i);
 
 	// Load the environment into managed memory
-	sceneLoader.Child("environment").ReadTexture( &env );
+	sceneLoader.Child("environment").ReadTexture( &env, BLACK );
+
+	// Set up the RNG
+	cudaMallocManaged(&rng, sizeof(RNG));
+	rng = new RNG();
 }
 
 size_t CountNodes( Loader const &loader ) {
@@ -310,6 +314,10 @@ void Camera::Load( Loader const &loader )
 	loader.Child("target"   ).ReadFloat3( target       );
 	loader.Child("up"       ).ReadFloat3( up        );
 	loader.Child("fov"      ).ReadFloat( fov       );
+	loader.Child("dof"      ).ReadFloat( dof       );
+	Loader::String gamma = loader.Attribute("gamma");
+	if (gamma && strcmp(gamma, "sRGB") == 0)
+		sRGB = true;
 	const float3 dir = asNorm(target - position);
 	const float3 x = cross(dir, up);
 	up = asNorm(cross(x, dir));
@@ -383,6 +391,7 @@ void DirectionalLight::Load( Loader const& loader ) {
 void PointLight::Load( Loader const& loader ) {
 	loader.Child("intensity").ReadColor( intensity );
 	loader.Child("position").ReadFloat3( position );
+	loader.Child("size").ReadFloat( size );
 }
 
 //-------------------------------------------------------------------------------
