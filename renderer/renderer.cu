@@ -4,13 +4,13 @@
 // The scene that we are rendering
 __managed__ Scene theScene;
 
-void Renderer::BeginRendering() {
+void Renderer::BeginRendering(const bool wait) {
     rendering = true;
-
-    auto mainThread = std::thread(&Renderer::DoRendering, this);
-
-    if (mainThread.joinable())
-        mainThread.detach();
+    std::thread t(&Renderer::DoRendering, this);
+    if (t.joinable()) {
+        if (wait == true) t.join();
+        else t.detach();
+    }
 }
 
 void Renderer::DoRendering() {
@@ -149,9 +149,4 @@ void Renderer::DoRendering() {
     // We are done
     rendering = false;
     printf("Render complete!\n");
-}
-
-
-void Renderer::StopRendering() {
-    rendering = false;
 }

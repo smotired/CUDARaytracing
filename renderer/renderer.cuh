@@ -67,8 +67,7 @@ public:
     [[nodiscard]] std::string SceneFileName() const { return sceneFile; }
 
     [[nodiscard]] bool IsRendering() const { return rendering; }
-    void BeginRendering();
-    void StopRendering();
+    void BeginRendering(bool wait = false);
 private:
     // Compute a black and white image
     template <typename T, bool invert>

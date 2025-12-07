@@ -28,9 +28,6 @@ set(SRC_RDR
         renderer/trace.cu
         renderer/shading.cu
         renderer/bvh.cu
-        renderer/bvh.cuh
-        renderer/rng.cuh
-        renderer/sampler.cuh
 )
 
 set(SRC_SCN
@@ -38,7 +35,6 @@ set(SRC_SCN
         scene/lights.cu
         scene/mesh.cu
         scene/texture.cu
-        scene/texture.cuh
 )
 
 # --------------------------------

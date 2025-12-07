@@ -34,8 +34,7 @@
       <reflection value="0.5"/>
     </material>
     <material type="blinn" name="bricks">
-      <diffuse texture="textures/bricks.png">
-      </diffuse>
+      <diffuse texture="textures/bricks.png" />
       <specular value="0.3"/>
       <glossiness value="10"/>
     </material>

@@ -63,7 +63,7 @@ __device__ bool Material::GenerateSample(float3 const& v, Hit const &hit, float3
 		// Bounce specularly. Reflect off the random normal.
 		dir = reflect(v, gln);
 		info.prob = pS * (glossiness + 1) * 0.5f * OVERPI * powf(gln % hit.n, glossiness + 1);
-		info.mult = kA * kS * (glossiness + 2) * 0.5f * OVERPI * powf(gln % hit.n, glossiness);
+		info.mult = kA * kS * (glossiness + 2) * 0.125f * OVERPI * powf(gln % hit.n, glossiness);
 
 		return true;
 	}
@@ -143,7 +143,7 @@ __device__ void Material::GetSampleInfo(float3 const& v, Hit const &hit, float3 
 		// = probability of choosing the half-vector as a glossy normal
 		const float3 rn = asNorm(v + dir);
 		info.prob += pS * (glossiness + 1) * 0.5f * OVERPI * powf(hit.n % rn, glossiness + 1);
-		info.mult += kS * (glossiness + 2) * 0.5f * OVERPI * powf(hit.n % rn, glossiness);
+		info.mult += kS * (glossiness + 2) * 0.125f * OVERPI * powf(hit.n % rn, glossiness);
 	}
 
 	// should include refraction but idk how lmao
