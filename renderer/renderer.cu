@@ -20,6 +20,8 @@ void Renderer::DoRendering() {
     // Allocate memory for the rendering image
     const unsigned int size = theScene.render.width * theScene.render.height;
     CERR(cudaMalloc(&theScene.render.results, sizeof(color) * size));
+    CERR(cudaMalloc(&theScene.render.normals, sizeof(float3) * size));
+    CERR(cudaMalloc(&theScene.render.albedos, sizeof(color) * size));
 
     // And the final converted image
     Color24 *converted;
@@ -75,8 +77,15 @@ void Renderer::DoRendering() {
     printf("Preparing for denoise.\n");
     float *prepColors;
     CERR(cudaMalloc(&prepColors, size * 3 * sizeof(float)));
+    float *prepNormals;
+    CERR(cudaMalloc(&prepNormals, size * 3 * sizeof(float)));
+    float *prepAlbedos;
+    CERR(cudaMalloc(&prepAlbedos, size * 3 * sizeof(float)));
 
-    PrepareForDenoise<<<convBlocks, convThreads>>>(theScene.render.results, prepColors, size, 1.0f / static_cast<float>(PASSES));
+    PrepareForDenoise<<<convBlocks, convThreads>>>(
+        theScene.render.results, theScene.render.normals, theScene.render.albedos,
+        prepColors, prepNormals, prepAlbedos,
+        size, 1.0f / static_cast<float>(PASSES));
     CLERR();
     CERR(cudaDeviceSynchronize());
     CERR(cudaFree(theScene.render.results));
@@ -86,17 +95,25 @@ void Renderer::DoRendering() {
     oidnCommitDevice(device);
 
     OIDNBuffer colorBuffer = oidnNewBuffer(device, size * 3 * sizeof(float));
+    OIDNBuffer normalBuffer = oidnNewBuffer(device, size * 3 * sizeof(float));
+    OIDNBuffer albedoBuffer = oidnNewBuffer(device, size * 3 * sizeof(float));
 
     // TODO: Filter creation is supposedly expensive so might do it elsewhere
     OIDNFilter filter = oidnNewFilter(device, "RT");
     oidnSetFilterImage(filter, "color", colorBuffer, OIDN_FORMAT_FLOAT3, theScene.render.width, theScene.render.height, 0, 0, 0);
+    oidnSetFilterImage(filter, "normal", normalBuffer, OIDN_FORMAT_FLOAT3, theScene.render.width, theScene.render.height, 0, 0, 0);
+    oidnSetFilterImage(filter, "albedo", albedoBuffer, OIDN_FORMAT_FLOAT3, theScene.render.width, theScene.render.height, 0, 0, 0);
     oidnSetFilterImage(filter, "output", colorBuffer, OIDN_FORMAT_FLOAT3, theScene.render.width, theScene.render.height, 0, 0, 0);
     oidnCommitFilter(filter);
 
     // Fill input image buffers
-    printf("Filling buffer\n");
+    printf("Filling buffers\n");
     CERR(cudaMemcpy(oidnGetBufferData(colorBuffer), prepColors, size * 3 * sizeof(float), cudaMemcpyDeviceToHost));
+    CERR(cudaMemcpy(oidnGetBufferData(normalBuffer), prepNormals, size * 3 * sizeof(float), cudaMemcpyDeviceToHost));
+    CERR(cudaMemcpy(oidnGetBufferData(albedoBuffer), prepAlbedos, size * 3 * sizeof(float), cudaMemcpyDeviceToHost));
     CERR(cudaFree(prepColors));
+    CERR(cudaFree(normalBuffer));
+    CERR(cudaFree(albedoBuffer));
 
     // Filter the beauty image
     printf("Executing denoiser\n");
@@ -106,11 +123,19 @@ void Renderer::DoRendering() {
         printf("Error: %s\n", errorMessage);
 
     // Convert colors
-    printf("Converting colors...\n");
+    printf("Saving colors.\n");
     float *filteredColors;
     CERR(cudaMalloc(&filteredColors, size * 3 * sizeof(float)));
     CERR(cudaMemcpy(filteredColors, oidnGetBufferData(colorBuffer), size * 3 * sizeof(float), cudaMemcpyHostToDevice));
 
+    printf("Denoiser cleanup.\n");
+    oidnReleaseBuffer(colorBuffer);
+    oidnReleaseBuffer(normalBuffer);
+    oidnReleaseBuffer(albedoBuffer);
+    oidnReleaseFilter(filter);
+    oidnReleaseDevice(device);
+
+    printf("Converting colors.\n");
     ConvertColors<<<convBlocks, convThreads>>>(filteredColors, converted, size, theScene.camera.sRGB);
     CLERR();
     CERR(cudaDeviceSynchronize());

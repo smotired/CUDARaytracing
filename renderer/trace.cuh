@@ -7,7 +7,7 @@
 __global__ void TracePrimaryRays(int passId);
 
 // Trace a ray through the scene and accumulate light
-__device__ void TracePath(Ray const& origin, color* target, curandStateXORWOW_t *rng);
+__device__ void TracePath(Ray const& origin, color* target, float3* normal, color* albedo, curandStateXORWOW_t *rng);
 
 // Trace a ray through the scene and calculate the returned color (legacy)
 __device__ void TraceRay(Ray& ray, int hitSide = HIT_FRONT_AND_BACK);

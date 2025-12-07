@@ -36,7 +36,7 @@ __global__ void TracePrimaryRays(const int passId) {
         const float3 rayEndPos = pixelCoords + theScene.render.pixelSize * (aa_x * theScene.render.cX - aa_y * theScene.render.cY);
 
         Ray ray(rayStartPos, rayEndPos - rayStartPos, pI, 0, WHITE * invertedSampleCount);
-        TracePath(ray, theScene.render.results + pI, &rng);
+        TracePath(ray, theScene.render.results + pI, theScene.render.normals + pI, theScene.render.albedos + pI, &rng);
     }
 }
 
@@ -80,7 +80,7 @@ __device__ bool TraceThroughScene(Ray& ray, Hit& hit) {
     return hitAnything;
 }
 
-__device__ void TracePath(Ray const& origin, color* target, curandStateXORWOW_t *rng) {
+__device__ void TracePath(Ray const& origin, color* target, float3* normal, color* albedo, curandStateXORWOW_t *rng) {
     Ray ray = origin;
     while (ray.bounce < BOUNCES) {
         const float3 v = -asNorm(ray.dir);
@@ -90,13 +90,22 @@ __device__ void TracePath(Ray const& origin, color* target, curandStateXORWOW_t 
         const bool hitAnything = TraceThroughScene(ray, hit);
         if (!hitAnything) {
             *target += ray.contribution * theScene.env->EvalEnvironment(ray.dir);
+            if (ray.bounce == 0) {
+                *normal += ray.contribution * asNorm(ray.dir);
+                *albedo += ray.contribution * theScene.env->EvalEnvironment(ray.dir);
+            }
             break;
         }
 
         // If we hit a light, just end at the light's radiance.
         if (hit.hitLight) {
             Light* light = hit.light;
-            *target += ray.contribution * LIGHT_RADIANCE(light);
+            const color rad = LIGHT_RADIANCE(light);
+            *target += ray.contribution * rad;
+            if (ray.bounce == 0) {
+                *normal += ray.contribution * hit.n;
+                *albedo += ray.contribution * rad;
+            }
             break;
         }
 
@@ -104,6 +113,12 @@ __device__ void TracePath(Ray const& origin, color* target, curandStateXORWOW_t 
         const int lightId = static_cast<int>(RandomFloat(rng) * static_cast<float>(theScene.lightCount));
         const Light* light = theScene.lights + lightId;
         const Material* mtl = hit.node->material;
+
+        // For primary rays, add normal/albedo colors.
+        if (ray.bounce == 0) {
+            *normal += ray.contribution * hit.n;
+            *albedo += ray.contribution * hit.Eval(mtl->diffuse);
+        }
 
         // Generate a sample for the light
         float3 lDir;

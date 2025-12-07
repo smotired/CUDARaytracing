@@ -29,14 +29,23 @@ __global__ void ConvertColors(float const* in, Color24 *out, const size_t N, con
     out[i] = Color24(sRGB ? LinearTosRGB(col) : col);
 }
 
-__global__ void PrepareForDenoise(color const* results, float* oidnBeauty, const size_t N, const float passMultiplier) {
+__global__ void PrepareForDenoise(color const* results, float3 const* normals, color const* albedos, float* oidnBeauty, float* oidnNormal, float* oidnAlbedo, size_t N, float passMultiplier) {
     const unsigned int i = blockIdx.x * blockDim.x + threadIdx.x;
     if (i >= N) return;
-
     // All of the input arrays are totaled for each pass so we must divide as well.
 
     // Set up the beauty
     oidnBeauty[3 * i]     = results[i].x * passMultiplier;
     oidnBeauty[3 * i + 1] = results[i].y * passMultiplier;
     oidnBeauty[3 * i + 2] = results[i].z * passMultiplier;
+
+    // Set up the normal
+    oidnNormal[3 * i]     = normals[i].x * passMultiplier;
+    oidnNormal[3 * i + 1] = normals[i].y * passMultiplier;
+    oidnNormal[3 * i + 2] = normals[i].z * passMultiplier;
+
+    // Set up the albedo
+    oidnAlbedo[3 * i]     = albedos[i].x * passMultiplier;
+    oidnAlbedo[3 * i + 1] = albedos[i].y * passMultiplier;
+    oidnAlbedo[3 * i + 2] = albedos[i].z * passMultiplier;
 }

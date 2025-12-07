@@ -32,7 +32,9 @@ struct RenderInfo {
     // Results of the render for each pixel
     color* results;
 
-    // Extra information that is constant for all rays:
+    // Extra information for render
+    float3* normals;
+    color* albedos;
 
     // Size of a single pixel in world space
     float pixelSize;
