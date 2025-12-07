@@ -62,7 +62,7 @@ __device__ bool Material::GenerateSample(float3 const& v, Hit const &hit, float3
 	if (p < pD + pS) {
 		// Bounce specularly. Reflect off the random normal.
 		dir = reflect(v, gln);
-		info.prob = pS * (glossiness + 1) * 0.5f * OVERPI * powf(gln % hit.n, glossiness + 1);
+		info.prob = pS * (glossiness + 1) * 0.125f * OVERPI * powf(gln % hit.n, glossiness);
 		info.mult = kA * kS * (glossiness + 2) * 0.125f * OVERPI * powf(gln % hit.n, glossiness);
 
 		return true;
@@ -88,19 +88,19 @@ __device__ bool Material::GenerateSample(float3 const& v, Hit const &hit, float3
 		// If TIR does not happen, decide between fresnel or not
 		if (!tir) {
 			if (RandomFloat(rng) >= f_theta) {
-				info.prob = pT * (1 - f_theta); // * (glossiness + 1) * 0.5f * OVERPI * powf(gln % hit.n, glossiness + 1);
-				info.mult = kA * kT * (1 - f_theta); // * (glossiness + 2) * 0.5f * OVERPI * powf(gln % hit.n, glossiness);
+				info.prob = pT * (1 - f_theta); // * (glossiness + 1) * 0.125f * OVERPI * powf(gln % hit.n, glossiness);
+				info.mult = kA * kT * (1 - f_theta); // * (glossiness + 2) * 0.125f * OVERPI * powf(gln % hit.n, glossiness);
 			} else {
 				dir = reflect(v, h);
-				info.prob = pT * f_theta; // * (glossiness + 1) * 0.5f * OVERPI * powf(gln % hit.n, glossiness + 1);
-				info.mult = kA * kT * f_theta; // * (glossiness + 2) * 0.5f * OVERPI * powf(gln % hit.n, glossiness);
+				info.prob = pT * f_theta; // * (glossiness + 1) * 0.125f * OVERPI * powf(gln % hit.n, glossiness);
+				info.mult = kA * kT * f_theta; // * (glossiness + 2) * 0.125f * OVERPI * powf(gln % hit.n, glossiness);
 			}
 		}
 
 		// Otherwise bounce specularly
 		else {
-			info.prob = pT;
-			info.mult = kA * kT;
+			info.prob = pT; // * (glossiness + 1) * 0.125f * OVERPI * powf(gln % hit.n, glossiness);
+			info.mult = kA * kT; // * (glossiness + 1) * 0.125f * OVERPI * powf(gln % hit.n, glossiness);
 		}
 
 		return true;

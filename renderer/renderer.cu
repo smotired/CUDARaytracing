@@ -111,9 +111,10 @@ void Renderer::DoRendering() {
     CERR(cudaMemcpy(oidnGetBufferData(colorBuffer), prepColors, size * 3 * sizeof(float), cudaMemcpyDeviceToHost));
     CERR(cudaMemcpy(oidnGetBufferData(normalBuffer), prepNormals, size * 3 * sizeof(float), cudaMemcpyDeviceToHost));
     CERR(cudaMemcpy(oidnGetBufferData(albedoBuffer), prepAlbedos, size * 3 * sizeof(float), cudaMemcpyDeviceToHost));
+
     CERR(cudaFree(prepColors));
-    CERR(cudaFree(normalBuffer));
-    CERR(cudaFree(albedoBuffer));
+    CERR(cudaFree(prepNormals));
+    CERR(cudaFree(prepAlbedos));
 
     // Filter the beauty image
     printf("Executing denoiser\n");

@@ -8,7 +8,7 @@
 int main () {
     /*
     Renderer renderer;
-    renderer.LoadScene("scenes/testseq/f00.xml");
+    renderer.LoadScene("scenes/proj13/box.xml");
     ShowViewport(&renderer, false);
     */
 
