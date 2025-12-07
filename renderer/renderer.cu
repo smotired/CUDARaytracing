@@ -68,9 +68,13 @@ void Renderer::DoRendering() {
     printf("Freeing final memory.\n");
     CERR(cudaFree(converted));
     CERR(cudaFree(theScene.render.results));
+    CERR(cudaFree(theScene.render.normals));
+    CERR(cudaFree(theScene.render.albedos));
+    image.passes++;
 
-    */
+    //*/
 
+    //*
     // WITH DENOISER
 
     // Format colors, normals, albedo into a format processable by OIDN.
@@ -89,6 +93,8 @@ void Renderer::DoRendering() {
     CLERR();
     CERR(cudaDeviceSynchronize());
     CERR(cudaFree(theScene.render.results));
+    CERR(cudaFree(theScene.render.normals));
+    CERR(cudaFree(theScene.render.albedos));
 
     printf("Preparing OIDN device and filter\n");
     OIDNDevice device = oidnNewDevice(OIDN_DEVICE_TYPE_DEFAULT);
@@ -146,6 +152,7 @@ void Renderer::DoRendering() {
     CERR(cudaMemcpy(image.pixels, converted, sizeof(Color24) * size, cudaMemcpyDeviceToHost));
     CERR(cudaFree(converted));
     image.passes++;
+    //*/
 
     // We are done
     rendering = false;
