@@ -235,3 +235,7 @@ __host__ __device__ inline unsigned int ref(const uint3& a, const unsigned int i
         default: return a.x;
     }
 }
+
+__host__ __device__ inline bool checknan(const float3& f) {
+    return std::isnan(f.x) || std::isnan(f.y) || std::isnan(f.z);
+}

@@ -61,7 +61,7 @@ void Renderer::DoRendering() {
     }
     printf("================================\n");
 
-    /*
+    //*
     // WITHOUT DENOISER
 
     // Free remaining cuda memory
@@ -74,7 +74,7 @@ void Renderer::DoRendering() {
 
     //*/
 
-    //*
+    /*
     // WITH DENOISER
 
     // Format colors, normals, albedo into a format processable by OIDN.

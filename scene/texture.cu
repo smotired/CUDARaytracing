@@ -54,8 +54,8 @@ __device__ color Texture::Eval(float3 const& uvw) const {
 __device__ color Texture::EvalEnvironment(const float3 &dir) const
 {
     const float3 d = asNorm(dir);
-    const float phi = atan2f(d.y, d.x);
-    const float theta = acosf(fminf(fmaxf(d.z, -1.0f), 1.0f)); // clamp avoids nans
+    const float phi = atan2f(d.x, d.z);
+    const float theta = acosf(fminf(fmaxf(d.y, -1.0f), 1.0f)); // clamp avoids nans
 
     const float u = (phi + M_PI) * (0.5f / M_PI);
     const float v = theta * (1.0f / M_PI);

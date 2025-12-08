@@ -1,18 +1,13 @@
 #include "vector.cuh"
 
 __device__ void orthonormals(const float3 n, float3& x, float3& y) {
-    // Copied from Cem's code
-    if (n.z >= n.y) {
-        const float a =  1.0f / (1.0f + n.z);
-        const float b = -n.x * n.y * a;
-        set(x, 1.0f - n.x * n.x * a, b, -n.x);
-        set(y, b, 1 - n.y * n.y * a, -n.y);
-    } else {
-        const float a =  1.0f / (1.0f + n.y);
-        const float b = -n.x * n.z * a;
-        set(x, b, -n.z, 1 - n.y * n.y * a );
-        set(y, 1.0f - n.x * n.x * a, -n.x, b);
-    }
+    if (fabs(n.x) > fabs(n.z))
+        set(x, -n.y, n.x, 0.0f);
+    else
+        set(x, 0.0f, -n.z, n.y);
+    doNorm(x);
+    const auto [cx, cy, cz] = cross(n, x);
+    set(y, cx, cy, cz);
 }
 
 __device__ float3 reflect(const float3 incident, const float3 normal) {

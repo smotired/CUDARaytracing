@@ -63,7 +63,7 @@ __device__ bool PointLight::Intersect(Ray const &ray, Hit &hit) const {
         hit.n = normPos;
         hit.uvw = float3( // Spherical mapping
             0.5f * OVERPI * atan2(normPos.y, normPos.x) + 0.5f,
-            OVERPI * asin(normPos.z) + 0.5f,
+            OVERPI * asin(fmin(fmax(normPos.z, -1.0f), 1.0f)) + 0.5f,
             0);
         hit.front = true;
         hit.hitLight = true;
@@ -79,41 +79,11 @@ __device__ bool PointLight::Intersect(Ray const &ray, Hit &hit) const {
     hit.pos = ray.pos + back * ray.dir;
     hit.uvw = float3( // Spherical mapping
         0.5f * OVERPI * atan2(normPos.y, normPos.x) + 0.5f,
-        OVERPI * asin(normPos.z) + 0.5f,
+        OVERPI * asin(fmin(fmax(normPos.z, -1.0f), 1.0f)) + 0.5f,
         0);
     hit.n = normPos;
     hit.front = false;
     hit.hitLight = true;
 
     return true;
-}
-
-
-// All legacy
-__device__ color AmbientLight::Illuminate(const Hit &hit, float3 &dir) const {
-    return intensity;
-}
-
-__device__ color DirectionalLight::Illuminate(const Hit &hit, float3 &dir) const {
-    dir = -direction;
-
-    // Trace a shadow ray
-    ShadowRay ray(hit.pos, dir);
-    const bool obstructed = TraceShadowRay(ray, hit.n);
-
-    return obstructed ? BLACK : intensity;
-}
-
-__device__ color PointLight::Illuminate(const Hit &hit, float3 &dir) const {
-    dir = asNorm(position - hit.pos);
-
-    // Trace a shadow ray
-    ShadowRay ray(hit.pos, dir);
-    const bool obstructed = TraceShadowRay(ray, hit.n, length(position - hit.pos));
-
-    // Add attenuation and radiance
-    const color radiance = intensity * (1.0f / (4 * F_PI * size * size));
-    const float attenuation = 1.0f / lengthsq(position - hit.pos);
-
-    return obstructed ? BLACK : radiance * attenuation;
 }

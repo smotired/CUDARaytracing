@@ -119,12 +119,11 @@ public:
     Texture* specular = nullptr; // How much light is reflected
     float glossiness = 20;  // Smoothness of the surface
 
-    Texture* reflection = nullptr; // How much light is reflected (will be removed after path tracing)
     Texture* refraction = nullptr; // How much light is directly refracted
+    Texture* emission = nullptr; // How much light is directly emitted
     color absorption = BLACK; // How much light is absorbed
     float ior = 1;
 
-    __device__ void Shade(Ray const& ray, Hit const& hit) const; // Legacy
     void SetViewportMaterial( int mtlID=0 ) const {} // used for OpenGL display (unused though i think)
     void Load( Loader const &loader ) { /* Will do something later */ }
 

@@ -46,7 +46,7 @@ __device__ bool Sphere::IntersectRay(Ray const &ray, Hit& hit, const int hitSide
 			hit.n = hit.pos; // unit sphere is a special case.
 			hit.uvw = float3( // Spherical mapping
 				0.5f * OVERPI * atan2(hit.pos.y, hit.pos.x) + 0.5f,
-				OVERPI * asin(hit.pos.z) + 0.5f,
+				OVERPI * asin(fmin(fmax(hit.pos.z, -1.0f), 1.0f)) + 0.5f,
 				0);
 			hit.front = true;
 			hit.hitLight = false;
@@ -65,7 +65,7 @@ __device__ bool Sphere::IntersectRay(Ray const &ray, Hit& hit, const int hitSide
 		hit.n = hit.pos;
 		hit.uvw = float3( // Spherical mapping
 			0.5f * OVERPI * atan2(hit.pos.y, hit.pos.x) + 0.5f,
-			OVERPI * asin(hit.pos.z) + 0.5f,
+			OVERPI * asin(fmin(fmax(hit.pos.z, -1.0f), 1.0f)) + 0.5f,
 			0);
 		hit.front = false;
 		hit.hitLight = false;

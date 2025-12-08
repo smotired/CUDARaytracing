@@ -1,0 +1,306 @@
+<xml>
+  <scene>
+    <environment value="1" texture="textures/finalbg.png"/>
+
+    <object name="models/final/body_cell.obj" type="obj" material="teapot">
+      <scale x="-1" y="1" z="-1"/>
+      <rotate x="-0.599" y="-0.08" z="-0.796" angle="-60.235"/>
+      <translate x="-2.06" y="1.361" z="1.349"/>
+    </object>
+    <object name="models/final/body_cell_001.obj" type="obj" material="teapot">
+      <scale x="-1" y="1" z="-1"/>
+      <rotate x="-0.993" y="-0.103" z="0.066" angle="-110.008"/>
+      <translate x="2.277" y="2.268" z="3.494"/>
+    </object>
+    <object name="models/final/body_cell_002.obj" type="obj" material="teapot">
+      <scale x="-1" y="1" z="-1"/>
+      <rotate x="-0.421" y="0.773" z="0.474" angle="-114.931"/>
+      <translate x="-0.943" y="-1.472" z="-1.036"/>
+    </object>
+    <object name="models/final/body_cell_003.obj" type="obj" material="teapot">
+      <scale x="-1" y="1" z="-1"/>
+      <rotate x="0.32" y="0.018" z="0.947" angle="-97.604"/>
+      <translate x="-6.284" y="-0.915" z="5.262"/>
+    </object>
+    <object name="models/final/body_cell_004.obj" type="obj" material="teapot">
+      <scale x="-1" y="1" z="-1"/>
+      <rotate x="0.895" y="-0.346" z="-0.282" angle="-191.45"/>
+      <translate x="2.044" y="0.996" z="3.091"/>
+    </object>
+    <object name="models/final/body_cell_005.obj" type="obj" material="teapot">
+      <scale x="-1" y="1" z="-1"/>
+      <rotate x="-0.945" y="0.133" z="0.299" angle="-66.888"/>
+      <translate x="0.821" y="1.513" z="1.075"/>
+    </object>
+    <object name="models/final/body_cell_006.obj" type="obj" material="teapot">
+      <scale x="-1" y="1" z="-1"/>
+      <rotate x="0.018" y="-0.976" z="0.218" angle="-243.091"/>
+      <translate x="1.955" y="-2.576" z="-3.967"/>
+    </object>
+    <object name="models/final/body_cell_007.obj" type="obj" material="teapot">
+      <scale x="-1" y="1" z="-1"/>
+      <rotate x="0.532" y="0.642" z="0.552" angle="-3.33"/>
+      <translate x="-0.075" y="0.024" z="-0.128"/>
+    </object>
+    <object name="models/final/body_cell_008.obj" type="obj" material="teapot">
+      <scale x="-1" y="1" z="-1"/>
+      <rotate x="0.262" y="-0.144" z="-0.954" angle="-45.05"/>
+      <translate x="-1.266" y="0.964" z="-0.236"/>
+    </object>
+    <object name="models/final/body_cell_010.obj" type="obj" material="teapot">
+      <scale x="-1" y="1" z="-1"/>
+      <rotate x="-0.601" y="-0.792" z="0.109" angle="-226.779"/>
+      <translate x="-3.03" y="1.602" z="2.381"/>
+    </object>
+    <object name="models/final/body_cell_013.obj" type="obj" material="teapot">
+      <scale x="-1" y="1" z="-1"/>
+      <rotate x="0.59" y="-0.293" z="-0.752" angle="-74.456"/>
+      <translate x="0.218" y="1.275" z="0.44"/>
+    </object>
+    <object name="models/final/body_cell_014.obj" type="obj" material="teapot">
+      <scale x="-1" y="1" z="-1"/>
+      <rotate x="-0.955" y="-0.238" z="0.175" angle="-243.404"/>
+      <translate x="-2.146" y="2.304" z="-5.499"/>
+    </object>
+    <object name="models/final/body_cell_015.obj" type="obj" material="teapot">
+      <scale x="-1" y="1" z="-1"/>
+      <rotate x="-0.909" y="0.108" z="0.401" angle="-115.94"/>
+      <translate x="2.429" y="2.369" z="1.418"/>
+    </object>
+    <object name="models/final/body_cell_016.obj" type="obj" material="teapot">
+      <scale x="-1" y="1" z="-1"/>
+      <rotate x="-0.967" y="0.144" z="0.209" angle="-2.16"/>
+      <translate x="0.067" y="0.012" z="0.129"/>
+    </object>
+    <object name="models/final/body_cell_017.obj" type="obj" material="teapot">
+      <scale x="-1" y="1" z="-1"/>
+      <rotate x="0.802" y="0.043" z="0.596" angle="-244.695"/>
+      <translate x="1.715" y="2.373" z="3.165"/>
+    </object>
+    <object name="models/final/body_cell_018.obj" type="obj" material="teapot">
+      <scale x="-1" y="1" z="-1"/>
+      <rotate x="0.056" y="0.207" z="0.977" angle="-84.284"/>
+      <translate x="2.279" y="2.394" z="-1.117"/>
+    </object>
+    <object name="models/final/body_cell_020.obj" type="obj" material="teapot">
+      <scale x="-1" y="1" z="-1"/>
+      <rotate x="-0.147" y="0.637" z="-0.757" angle="-101.051"/>
+      <translate x="2.687" y="-1.706" z="-1.919"/>
+    </object>
+    <object name="models/final/body_cell_022.obj" type="obj" material="teapot">
+      <scale x="-1" y="1" z="-1"/>
+      <rotate x="-0.312" y="0.313" z="0.897" angle="-71.817"/>
+      <translate x="2.038" y="2.137" z="-0.481"/>
+    </object>
+    <object name="models/final/body_cell_023.obj" type="obj" material="teapot">
+      <scale x="-1" y="1" z="-1"/>
+      <rotate x="0.938" y="-0.079" z="0.336" angle="-303.236"/>
+      <translate x="2.853" y="-2.526" z="-5.563"/>
+    </object>
+    <object name="models/final/teapot_lid.obj" type="obj" material="teapot">
+      <scale x="-1" y="1" z="-1"/>
+      <rotate x="-0.478" y="-0.648" z="0.593" angle="-34.365"/>
+      <translate x="1.402" y="-0.883" z="1.533"/>
+    </object>
+    <object name="marble1" type="sphere" material="marble2">
+      <scale x="0.4" y="0.4" z="0.4"/>
+      <rotate x="0.249" y="0.764" z="-0.595" angle="-145.847"/>
+      <translate x="3.134" y="0.4" z="0.925"/>
+    </object>
+    <object name="marble2" type="sphere" material="marble3">
+      <scale x="0.4" y="0.4" z="0.4"/>
+      <rotate x="-0.426" y="0.853" z="-0.303" angle="-222.399"/>
+      <translate x="1.802" y="1.035" z="1.782"/>
+    </object>
+    <object name="marble3" type="sphere" material="marble4">
+      <scale x="0.4" y="0.4" z="0.4"/>
+      <rotate x="0.854" y="0.371" z="0.365" angle="-191.447"/>
+      <translate x="-1.059" y="0.4" z="0.304"/>
+    </object>
+    <object name="marble4" type="sphere" material="marble1">
+      <scale x="0.4" y="0.4" z="0.4"/>
+      <rotate x="-0.125" y="0.57" z="0.812" angle="-197.302"/>
+      <translate x="-10.457" y="-25.773" z="-19.953"/>
+    </object>
+    <object name="marble5" type="sphere" material="marble2">
+      <scale x="0.4" y="0.4" z="0.4"/>
+      <rotate x="-0.598" y="0.091" z="0.796" angle="-126.2"/>
+      <translate x="10.454" y="0.201" z="6.78"/>
+    </object>
+    <object name="marble6" type="sphere" material="marble3">
+      <scale x="0.4" y="0.4" z="0.4"/>
+      <rotate x="-0.376" y="0.904" z="-0.204" angle="-65.655"/>
+      <translate x="0.427" y="0.765" z="0.079"/>
+    </object>
+    <object name="marble7" type="sphere" material="marble4">
+      <scale x="0.4" y="0.4" z="0.4"/>
+      <rotate x="0.768" y="-0.543" z="-0.338" angle="-228.6"/>
+      <translate x="-3.284" y="0.4" z="3.361"/>
+    </object>
+    <object name="marble8" type="sphere" material="marble1">
+      <scale x="0.4" y="0.4" z="0.4"/>
+      <rotate x="0.937" y="-0.018" z="-0.35" angle="-161.576"/>
+      <translate x="-3.751" y="0.4" z="4.042"/>
+    </object>
+    <object name="marble9" type="sphere" material="marble2">
+      <scale x="0.4" y="0.4" z="0.4"/>
+      <rotate x="-0.674" y="-0.047" z="0.737" angle="-167.203"/>
+      <translate x="-3.237" y="0.4" z="5.718"/>
+    </object>
+    <object name="marble10" type="sphere" material="marble3">
+      <scale x="0.4" y="0.4" z="0.4"/>
+      <rotate x="-0.45" y="0.787" z="-0.422" angle="-295.416"/>
+      <translate x="-1.506" y="0.4" z="1.901"/>
+    </object>
+    <object name="marble11" type="sphere" material="marble4">
+      <scale x="0.4" y="0.4" z="0.4"/>
+      <rotate x="0.333" y="-0.804" z="0.493" angle="-148.005"/>
+      <translate x="-1.397" y="0.4" z="-2.739"/>
+    </object>
+    <object name="marble12" type="sphere" material="marble1">
+      <scale x="0.4" y="0.4" z="0.4"/>
+      <rotate x="0.653" y="-0.736" z="-0.182" angle="-185.523"/>
+      <translate x="-4.652" y="-3.248" z="11.907"/>
+    </object>
+    <object name="marble13" type="sphere" material="marble2">
+      <scale x="0.4" y="0.4" z="0.4"/>
+      <rotate x="0.446" y="0.891" z="-0.084" angle="-69.415"/>
+      <translate x="-1.495" y="0.4" z="1.021"/>
+    </object>
+    <object name="marble14" type="sphere" material="marble3">
+      <scale x="0.4" y="0.4" z="0.4"/>
+      <rotate x="0.061" y="-0.477" z="-0.877" angle="-299.587"/>
+      <translate x="3.637" y="0.4" z="-1.797"/>
+    </object>
+    <object name="marble15" type="sphere" material="marble4">
+      <scale x="0.4" y="0.4" z="0.4"/>
+      <rotate x="-0.629" y="0.771" z="-0.098" angle="-160.583"/>
+      <translate x="-13.696" y="-7.511" z="9.173"/>
+    </object>
+    <object name="marble16" type="sphere" material="marble1">
+      <scale x="0.4" y="0.4" z="0.4"/>
+      <rotate x="0.067" y="0.335" z="0.94" angle="-92.891"/>
+      <translate x="2.162" y="0.4" z="2.106"/>
+    </object>
+    <object name="marble17" type="sphere" material="marble2">
+      <scale x="0.4" y="0.4" z="0.4"/>
+      <rotate x="0.69" y="-0.303" z="-0.657" angle="-138.717"/>
+      <translate x="-4.221" y="0.4" z="0.778"/>
+    </object>
+    <object name="marble18" type="sphere" material="marble3">
+      <scale x="0.4" y="0.4" z="0.4"/>
+      <rotate x="0.828" y="-0.556" z="0.072" angle="-108.414"/>
+      <translate x="-40.359" y="-52.464" z="-7.989"/>
+    </object>
+    <object name="marble19" type="sphere" material="marble4">
+      <scale x="0.4" y="0.4" z="0.4"/>
+      <rotate x="-0.975" y="-0.105" z="0.197" angle="-220.173"/>
+      <translate x="-6.44" y="0.4" z="-5.699"/>
+    </object>
+    <object name="marble20" type="sphere" material="marble1">
+      <scale x="0.4" y="0.4" z="0.4"/>
+      <rotate x="0.562" y="-0.318" z="-0.764" angle="-243.458"/>
+      <translate x="2.727" y="0.4" z="-0.474"/>
+    </object>
+    <object name="marble21" type="sphere" material="marble2">
+      <scale x="0.4" y="0.4" z="0.4"/>
+      <rotate x="-0.536" y="0.187" z="0.823" angle="-102.864"/>
+      <translate x="-18.542" y="-21.025" z="-12.312"/>
+    </object>
+    <object name="marble22" type="sphere" material="marble3">
+      <scale x="0.4" y="0.4" z="0.4"/>
+      <rotate x="0.358" y="-0.244" z="-0.901" angle="-88.902"/>
+      <translate x="-5.066" y="0.4" z="-4.066"/>
+    </object>
+    <object name="marble23" type="sphere" material="marble4">
+      <scale x="0.4" y="0.4" z="0.4"/>
+      <rotate x="0.766" y="-0.431" z="0.476" angle="-267.882"/>
+      <translate x="-4.364" y="0.4" z="8.851"/>
+    </object>
+    <object name="marble24" type="sphere" material="marble1">
+      <scale x="0.4" y="0.4" z="0.4"/>
+      <rotate x="0.554" y="-0.777" z="-0.298" angle="-123.772"/>
+      <translate x="2.316" y="-9.63" z="-14.336"/>
+    </object>
+    <object name="ground" type="plane" material="table">
+      <scale x="10" y="10" z="10"/>
+      <rotate x="1" y="0" z="0" angle="-90"/>
+      <translate x="0" y="0" z="0"/>
+    </object>
+
+    <material type="blinn" name="teapot">
+      <diffuse r="1" g="1" b="1" value="0.75" />
+      <specular r="1" g="1" b="1" value="0.25"/>
+      <refraction r="1" g="1" b="1" value="0" index="1.52"/>
+      <glossiness value="512"/>
+      <absorption r="0.06" g="0.05" b="0.17" value="0"/>
+      <emission r="0" g="0" b="0" value="0"/>
+    </material>
+    <material type="blinn" name="marble1">
+      <diffuse r="0.69" g="0.42" b="0.3" value="0.25" />
+      <specular r="0.69" g="0.56" b="0.45" value="0.75"/>
+      <refraction r="0" g="0" b="0" value="0" index="1"/>
+      <glossiness value="64"/>
+      <absorption r="0" g="0" b="0" value="0"/>
+      <emission r="0" g="0" b="0" value="0"/>
+    </material>
+    <material type="blinn" name="marble2">
+      <diffuse r="0" g="0" b="0" value="0" />
+      <specular r="1" g="0.87" b="0.64" value="0.09"/>
+      <refraction r="0" g="0" b="0" value="0" index="1"/>
+      <glossiness value="1024"/>
+      <absorption r="0" g="0" b="0" value="0"/>
+      <emission r="0" g="0" b="0" value="0"/>
+    </material>
+    <material type="blinn" name="marble3">
+      <diffuse r="1" g="0" b="0" value="0.4" texture="textures/uballout.png" />
+      <specular r="1" g="0.5" b="0.5" value="0.2" texture="textures/uballout.png"/>
+      <refraction r="0" g="0" b="0" value="0" index="1"/>
+      <glossiness value="32"/>
+      <absorption r="0" g="0" b="0" value="0"/>
+      <emission r="1" g="0.18" b="0.18" value="6" texture="textures/uballin.png"/>
+    </material>
+    <material type="blinn" name="marble4">
+      <diffuse r="0" g="0" b="0" value="0" />
+      <specular r="0" g="0" b="0" value="0"/>
+      <refraction r="1" g="1" b="1" value="0.88" index="1.5"/>
+      <glossiness value="128"/>
+      <absorption r="0.11" g="0.12" b="0" value="0.02"/>
+      <emission r="0" g="0" b="0" value="0"/>
+    </material>
+    <material type="blinn" name="table">
+      <diffuse r="1" g="1" b="1" value="0.9" texture="textures/wood.png" />
+      <specular r="1" g="1" b="1" value="0.1"/>
+      <refraction r="0" g="0" b="0" value="1" index="1"/>
+      <glossiness value="32"/>
+      <absorption r="0" g="0" b="0" value="1"/>
+      <emission r="0" g="0" b="0" value="0"/>
+    </material>
+
+    <material type="blinn" name="lens">
+      <diffuse r="0" g="0" b="0" value="0" />
+      <specular r="0" g="0" b="0" value="0"/>
+      <refraction r="1" g="1" b="1" value="1" index="1.52"/>
+      <glossiness value="512"/>
+      <absorption r="0" g="0" b="0" value="0"/>
+      <emission r="0" g="0" b="0" value="0"/>
+    </material>
+
+    <light type="point" name="globallight">
+      <position x="7.96" y="18.73" z="13.23"/>
+      <intensity r="1" g="1" b="1" value="500"/>
+      <size value="10"/>
+      <attenuation value="1"/>
+    </light>
+  </scene>
+
+  <camera gamma="sRGB">
+    <position x="-6" y="5.5" z="6"/>
+    <target x="0" y="0.8" z="0"/>
+    <up x="0" y="1" z="0"/>
+    <fov value="40"/>
+    <width value="1280"/>
+    <height value="720"/>
+    <dof value="0.125"/>
+  </camera>
+</xml>

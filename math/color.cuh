@@ -35,7 +35,8 @@ struct Color24 {
     }
     Color24() { r = 0; g = 0; b = 0; }
     __host__ __device__ color ToColor() const {
-        return color(r, g, b) * (1.0f / 256.0f);
+        constexpr float over256 = 1.0f / 256.0f;
+        return color(r, g, b) * over256;
     }
 private:
     __host__ __device__ static uint8_t ClampToInt(float f) { int v = (int)f; return v<0 ? 0 : (v>255 ? 255 : static_cast<uint8_t>(v)); }

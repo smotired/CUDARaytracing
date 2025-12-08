@@ -117,8 +117,11 @@ __device__ void TracePath(Ray const& origin, color* target, float3* normal, colo
         // For primary rays, add normal/albedo colors.
         if (ray.bounce == 0) {
             *normal += ray.contribution * hit.n;
-            *albedo += ray.contribution * hit.Eval(mtl->diffuse);
+            *albedo += ray.contribution * hit.Eval(mtl->diffuse) + hit.Eval(mtl->emission);
         }
+
+        // Add emission color
+        *target += ray.contribution * hit.Eval(mtl->emission);
 
         // Generate a sample for the light
         float3 lDir;
@@ -149,49 +152,11 @@ __device__ void TracePath(Ray const& origin, color* target, float3* normal, colo
         ray.dir = nDir;
         if (nInfo.prob <= F_EPS)
             break;
+
         ray.contribution *= nInfo.mult * (1.0f / nInfo.prob);
     }
 }
 
-// Legacy
-__device__ void TraceRay(Ray &ray, int hitSide) {
-    // Add some bias
-    ray.pos += ray.dir * BIAS;
-
-    // Initialize a hit
-    Hit hit;
-
-    // Primary rays should only check front hits
-    if (ray.IsPrimary() && hitSide & HIT_FRONT) hitSide = HIT_FRONT;
-
-    // Loop through the object list
-    bool hitAnything = false;
-    for (int i = 0; i < theScene.nodeCount; i++) {
-        Node* node = theScene.nodes + i;
-
-        if (HAS_OBJ(node->object)) {
-            // Check for intersection with its bounding box
-            float boxZ = BIGFLOAT;
-            const bool hitBox = node->boundingBox.IntersectRay(ray, boxZ);
-
-            if (hitBox && boxZ < hit.z) {
-                // Check for intersection with the actual object, and transform hit
-                node->ToLocal(ray);
-                if (OBJ_INTERSECT(node->object, ray, hit, hitSide)) {
-                    hitAnything = true;
-                    node->FromLocal(hit);
-                }
-                node->FromLocal(ray);
-            }
-        }
-    }
-
-    // Shade, or add color from environment. Assume no hit means no absorption.
-    if (hitAnything) hit.node->material->Shade(ray, hit);
-    else theScene.render.results[ray.pixel] += ray.contribution * theScene.env->EvalEnvironment(ray.dir);
-}
-
-// Not legacy
 __device__ bool TraceShadowRay(ShadowRay& ray, const float3 n, const float tMax, const int hitSide) {
     // Add some bias
     ray.pos += ray.dir * BIAS + n * BIAS;

@@ -176,10 +176,10 @@ void Scene::Load( Loader const &sceneLoader )
 	materials[0].diffuse = new Texture(WHITE);
 	cudaMallocManaged(&materials[0].specular, sizeof(Texture));
 	materials[0].specular = new Texture(WHITE);
-	cudaMallocManaged(&materials[0].reflection, sizeof(Texture));
-	materials[0].reflection = new Texture(BLACK);
 	cudaMallocManaged(&materials[0].refraction, sizeof(Texture));
 	materials[0].refraction = new Texture(BLACK);
+	cudaMallocManaged(&materials[0].emission, sizeof(Texture));
+	materials[0].emission = new Texture(BLACK);
 
 	auto *materialTable = new unsigned int[2 * materialCount];
 	for (int i = 0; i < 2 * materialCount; i++) { materialTable[i] = 0; }
@@ -396,9 +396,9 @@ void LoadMaterial( Loader const& loader, Material* materialList, int i, unsigned
 	loader.Child("diffuse").ReadTexture( &materialList[i].diffuse );
 	loader.Child("specular").ReadTexture( &materialList[i].specular );
 	loader.Child("glossiness").ReadFloat( materialList[i].glossiness );
-	loader.Child("reflection").ReadTexture( &materialList[i].reflection, BLACK );
 	loader.Child("refraction").ReadTexture( &materialList[i].refraction, BLACK );
 	loader.Child("refraction").ReadFloat( materialList[i].ior, "index" );
+	loader.Child("emission").ReadTexture( &materialList[i].emission, BLACK );
 	loader.Child("absorption").ReadColor( materialList[i].absorption );
 
 	Loader::String name = loader.Attribute("name");
