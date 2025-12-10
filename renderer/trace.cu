@@ -136,7 +136,7 @@ __device__ void TracePath(Ray const& origin, color* target, float3* normal, colo
         ShadowRay shadowRay(hit.pos, lDir);
         if (!TraceShadowRay(shadowRay, hit.n, lInfo.dist)) {
             const float probDenom = lInfo.prob * lInfo.prob + brdf.prob * brdf.prob;
-            if (probDenom > F_EPS) {
+            if (probDenom > F_EPS && lInfo.prob > F_EPS) {
                 const float powerOverProb = lInfo.prob / probDenom; // for efficiency we do not square numerator since we would just divide by it later
                 *target += ray.contribution * lInfo.mult * brdf.mult * powerOverProb;
             }
