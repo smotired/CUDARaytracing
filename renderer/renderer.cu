@@ -72,9 +72,9 @@ void Renderer::DoRendering() {
     CERR(cudaFree(theScene.render.albedos));
     image.passes++;
 
-    //*/
+    /*/
 
-    /*
+    //*
     // WITH DENOISER
 
     // Format colors, normals, albedo into a format processable by OIDN.

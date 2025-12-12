@@ -5,12 +5,12 @@
     <object name="models/final/teapot_body.obj" type="obj" material="teapot">
       <scale x="-1" y="1" z="-1"/>
       <rotate x="0" y="0" z="1" angle="-20"/>
-      <translate x="0" y="1.349" z="0"/>
+      <translate x="0" y="2.848" z="0"/>
     </object>
     <object name="models/final/teapot_lid.obj" type="obj" material="teapot">
       <scale x="-1" y="1" z="-1"/>
       <rotate x="0" y="0" z="1" angle="-20"/>
-      <translate x="0.023" y="1.617" z="0"/>
+      <translate x="0.023" y="3.116" z="0"/>
     </object>
     <object name="ground" type="plane" material="table">
       <scale x="10" y="10" z="10"/>
@@ -48,15 +48,15 @@
       <refraction r="0" g="0" b="0" value="0" index="1"/>
       <glossiness value="32"/>
       <absorption r="0" g="0" b="0" value="0"/>
-      <emission r="1" g="0.18" b="0.18" value="6" texture="textures/uballin.png"/>
+      <emission r="1" g="1" b="1" value="6" texture="textures/uballin.png"/>
     </material>
     <material type="blinn" name="marble4">
-      <diffuse r="0" g="0" b="0" value="0" />
-      <specular r="0" g="0" b="0" value="0"/>
-      <refraction r="1" g="1" b="1" value="0.88" index="1.5"/>
+      <diffuse r="0" g="0" b="0" value="0" texture="textures/uballout.png" />
+      <specular r="0" g="0" b="0" value="0" texture="textures/uballout.png"/>
+      <refraction r="1" g="1" b="1" value="0.88" index="1.52"/>
       <glossiness value="128"/>
       <absorption r="0.11" g="0.12" b="0" value="0.02"/>
-      <emission r="0" g="0" b="0" value="0"/>
+      <emission r="1" g="1" b="1" value="6" texture="textures/uballin.png"/>
     </material>
     <material type="blinn" name="table">
       <diffuse r="1" g="1" b="1" value="0.9" texture="textures/wood.png" />

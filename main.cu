@@ -6,13 +6,13 @@
 #include "renderer/renderer.cuh"
 
 int main () {
-    /*
+    //*
     Renderer renderer;
     renderer.LoadScene("scenes/final/frame0042.xml");
     ShowViewport(&renderer, false);
     //*/
 
-    //*
+    /*
     const Sequence s("scenes/final");
     s.DoRender();
     //*/
